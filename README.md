@@ -33,20 +33,32 @@ ali-realestate  (qwen3.5:2b, GGUF quantized, CPU inference)
 ## Project Structure
 
 ```
-ali-realestate/
+NLP_Assignment-3/
 ├── backend/
 │   ├── api/
 │   │   └── main.py                  # FastAPI + WebSocket server
 │   ├── Conversation/
 │   │   └── conversation.py          # Session mgmt, prompt orchestration, Ollama streaming
-│   └── Ollama/
-│       ├── Modelfile                # Custom ali-realestate model definition
-│       └── ModelCreation.sh         # ollama create + run commands
+│   ├── Ollama/
+│   │   ├── Modelfile                # Custom ali-realestate model definition
+│   │   └── ModelCreation.sh         # ollama create + run commands
+│   └── Voice/
+│       ├── asr.py                   # ASR — faster-whisper speech-to-text
+│       └── tts.py                   # TTS — piper text-to-speech
 ├── frontend/
 │   └── index.html                   # ChatGPT-style web UI (single file, no build step)
+├── tests/
+│   ├── conftest.py                  # Shared fixtures (mocks Ollama/ASR/TTS)
+│   ├── test_conversation.py         # Unit tests for conversation manager
+│   └── test_api.py                  # Integration tests for REST endpoints
+├── voices/
+│   ├── en_US-lessac-medium.onnx     # Piper TTS voice model
+│   └── en_US-lessac-medium.onnx.json
 ├── Dockerfile
 ├── docker-compose.yml
+├── vercel.json                      # Vercel deployment config
 ├── requirements.txt
+├── run.sh                           # Local one-command start script
 ├── Ali_Chatbot.postman_collection.json
 └── README.md
 ```
@@ -86,6 +98,33 @@ python3 backend/api/main.py
 
 # 5. Open the frontend
 open http://0.0.0.0:8000   # or serve via any static file server
+```
+
+### Option C — Vercel (frontend only)
+
+The chat UI is deployed as a static site on Vercel. The backend still runs locally.
+
+```bash
+# Install Vercel CLI (if not already installed)
+npm i -g vercel
+
+# Deploy from the project root
+vercel --prod
+```
+
+> **Note:** The Vercel deployment serves only the frontend. Point the backend
+> at your local machine or any server running the FastAPI + Ollama stack.
+
+---
+
+## Running Tests
+
+```bash
+# Install test dependencies
+pip install pytest httpx
+
+# Run all tests (no Ollama required — LLM/ASR/TTS are mocked)
+pytest tests/ -v
 ```
 
 ---
