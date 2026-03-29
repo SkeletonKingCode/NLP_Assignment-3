@@ -1,0 +1,14 @@
+# ── Core API ──────────────────────────────────────────────────────────────────
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+pydantic>=2.0.0
+python-multipart>=0.0.9       # required for UploadFile / File() in FastAPI
+
+# ── LLM ───────────────────────────────────────────────────────────────────────
+ollama>=0.2.0
+
+# ── ASR — Speech to Text ──────────────────────────────────────────────────────
+faster-whisper>=1.0.0         # CPU-optimised Whisper via CTranslate2
+
+# ── TTS — Text to Speech ──────────────────────────────────────────────────────
+piper-tts>=1.2.0              # requires voice .onnx model (see run.sh / README)

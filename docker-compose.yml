@@ -7,13 +7,11 @@ services:
     image: ollama/ollama:latest
     container_name: ali-ollama
     volumes:
-      - ollama_data:/root/.ollama           # persists downloaded models
-      - ./backend/Ollama:/modelfiles:ro     # Modelfile + creation scripts
+      - ollama_data:/root/.ollama
+      - ./backend/Ollama:/modelfiles:ro
     ports:
       - "11434:11434"
     restart: unless-stopped
-    # CPU-only: no deploy.resources.reservations needed
-    # To pull and create the custom model on first start:
     entrypoint: >
       sh -c "ollama serve &
              sleep 5 &&
@@ -21,7 +19,7 @@ services:
              ollama create ali-realestate -f /modelfiles/Modelfile &&
              wait"
 
-  # ── FastAPI Backend ─────────────────────────────────────────────────────────
+  # ── FastAPI Backend (chat + ASR + TTS) ─────────────────────────────────────
   api:
     build:
       context: .
@@ -30,12 +28,34 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - OLLAMA_HOST=http://ollama:11434     # point client at the ollama container
+      - OLLAMA_HOST=http://ollama:11434
+      # Path inside the container where the piper voice model will be placed
+      - PIPER_VOICE=/app/voices/en_US-lessac-medium.onnx
+      # Whisper model size — "base" is a good CPU default (change to "small" for better accuracy)
+      - WHISPER_MODEL=base
     depends_on:
       - ollama
     restart: unless-stopped
     volumes:
-      - ./frontend:/app/frontend:ro         # serve static frontend files
+      - ./frontend:/app/frontend:ro
+      # Persist downloaded voice models and Whisper cache between restarts
+      - voice_models:/app/voices
+      - whisper_cache:/root/.cache/huggingface
+    # On first start, download the piper voice model if not already present
+    command: >
+      sh -c "
+        mkdir -p /app/voices &&
+        if [ ! -f /app/voices/en_US-lessac-medium.onnx ]; then
+          echo 'Downloading piper voice model...' &&
+          BASE=https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium &&
+          wget -q -O /app/voices/en_US-lessac-medium.onnx      \$BASE/en_US-lessac-medium.onnx &&
+          wget -q -O /app/voices/en_US-lessac-medium.onnx.json \$BASE/en_US-lessac-medium.onnx.json &&
+          echo 'Piper voice model ready.'
+        fi &&
+        uvicorn backend.api.main:app --host 0.0.0.0 --port 8000 --workers 1
+      "
 
 volumes:
   ollama_data:
+  voice_models:
+  whisper_cache:

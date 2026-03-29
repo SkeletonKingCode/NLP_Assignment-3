@@ -159,10 +159,10 @@
       text-transform: capitalize;
     }
 
-    .stage-greeting        { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+    .stage-greeting           { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
     .stage-category_selection { background: rgba(16,185,129,.15); color: var(--emerald); border: 1px solid var(--emerald-dim); }
-    .stage-subtype_selection  { background: rgba(245,158,11,.15); color: var(--gold);    border: 1px solid var(--gold-dim); }
-    .stage-closing            { background: rgba(59,130,246,.15);  color: #60a5fa;       border: 1px solid #1e40af; }
+    .stage-subtype_selection  { background: rgba(245,158,11,.15);  color: var(--gold);   border: 1px solid var(--gold-dim); }
+    .stage-closing            { background: rgba(59,130,246,.15);   color: #60a5fa;       border: 1px solid #1e40af; }
 
     .inventory-hint {
       margin-top: 16px;
@@ -198,6 +198,12 @@
       font-weight: 500;
     }
 
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
     .header-status {
       display: flex;
       align-items: center;
@@ -216,6 +222,53 @@
 
     .status-dot.online  { background: var(--emerald); }
     .status-dot.typing  { background: var(--gold); animation: pulse 1s infinite; }
+
+    /* ── Speaker toggle button ─────────────────────────────────────────── */
+    .speaker-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      transition: background 0.15s, border-color 0.15s;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .speaker-btn:hover { background: var(--surface2); }
+
+    .speaker-btn.active {
+      background: rgba(16,185,129,.15);
+      border-color: var(--emerald);
+    }
+
+    /* ── TTS speaking indicator ────────────────────────────────────────── */
+    .speaking-badge {
+      display: none;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--emerald);
+      padding: 2px 8px;
+      border: 1px solid var(--emerald-dim);
+      border-radius: 999px;
+      background: rgba(16,185,129,.08);
+    }
+
+    .speaking-badge.visible { display: flex; }
+
+    .speaking-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--emerald);
+      animation: pulse 0.7s infinite;
+    }
 
     @keyframes pulse {
       0%, 100% { opacity: 1; }
@@ -237,7 +290,6 @@
     .messages::-webkit-scrollbar-track { background: transparent; }
     .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
-    /* Welcome state */
     .welcome {
       display: flex;
       flex-direction: column;
@@ -250,10 +302,7 @@
       animation: fadeIn 0.5s ease;
     }
 
-    .welcome-icon {
-      font-size: 52px;
-      filter: drop-shadow(0 0 20px rgba(16,185,129,0.4));
-    }
+    .welcome-icon { font-size: 52px; filter: drop-shadow(0 0 20px rgba(16,185,129,0.4)); }
 
     .welcome h2 {
       font-family: var(--font-head);
@@ -264,19 +313,9 @@
       -webkit-text-fill-color: transparent;
     }
 
-    .welcome p {
-      color: var(--text-muted);
-      max-width: 400px;
-      font-size: 14px;
-    }
+    .welcome p { color: var(--text-muted); max-width: 400px; font-size: 14px; }
 
-    .quick-prompts {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-      margin-top: 8px;
-    }
+    .quick-prompts { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 8px; }
 
     .quick-btn {
       padding: 8px 14px;
@@ -290,13 +329,8 @@
       font-family: var(--font-body);
     }
 
-    .quick-btn:hover {
-      border-color: var(--emerald);
-      color: var(--emerald);
-      background: rgba(16,185,129,0.06);
-    }
+    .quick-btn:hover { border-color: var(--emerald); color: var(--emerald); background: rgba(16,185,129,0.06); }
 
-    /* Message bubbles */
     .message {
       display: flex;
       gap: 12px;
@@ -315,14 +349,8 @@
       to   { opacity: 1; }
     }
 
-    .message.user {
-      flex-direction: row-reverse;
-      align-self: flex-end;
-    }
-
-    .message.ali {
-      align-self: flex-start;
-    }
+    .message.user  { flex-direction: row-reverse; align-self: flex-end; }
+    .message.ali   { align-self: flex-start; }
 
     .avatar {
       width: 32px;
@@ -349,17 +377,8 @@
       white-space: pre-wrap;
     }
 
-    .message.user .bubble {
-      background: var(--user-bg);
-      border: 1px solid var(--emerald-dim);
-      border-bottom-right-radius: 4px;
-    }
-
-    .message.ali .bubble {
-      background: var(--ali-bg);
-      border: 1px solid var(--border);
-      border-bottom-left-radius: 4px;
-    }
+    .message.user .bubble { background: var(--user-bg); border: 1px solid var(--emerald-dim); border-bottom-right-radius: 4px; }
+    .message.ali  .bubble { background: var(--ali-bg);  border: 1px solid var(--border);      border-bottom-left-radius: 4px; }
 
     .bubble.streaming::after {
       content: '▋';
@@ -369,17 +388,9 @@
       margin-left: 1px;
     }
 
-    @keyframes blink {
-      50% { opacity: 0; }
-    }
+    @keyframes blink { 50% { opacity: 0; } }
 
-    .message-meta {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 4px;
-      padding: 0 4px;
-    }
-
+    .message-meta { font-size: 11px; color: var(--text-muted); margin-top: 4px; padding: 0 4px; }
     .message.user .message-meta { text-align: right; }
 
     .error-bubble {
@@ -430,6 +441,43 @@
 
     #messageInput::placeholder { color: var(--text-muted); }
 
+    /* ── Mic button ────────────────────────────────────────────────────── */
+    #micBtn {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 16px;
+      line-height: 1;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    }
+
+    #micBtn:hover:not(:disabled) { background: var(--surface); border-color: var(--gold); }
+    #micBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    #micBtn.recording {
+      background: rgba(239,68,68,0.15);
+      border-color: var(--error);
+      animation: micPulse 1s ease-in-out infinite;
+    }
+
+    #micBtn.processing {
+      background: rgba(245,158,11,0.15);
+      border-color: var(--gold);
+    }
+
+    @keyframes micPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+      50%       { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+    }
+
+    /* ── Send button ─────────────────────────────────────────────────── */
     #sendBtn {
       width: 34px;
       height: 34px;
@@ -447,15 +495,9 @@
     #sendBtn:hover:not(:disabled) { background: #059669; }
     #sendBtn:active:not(:disabled) { transform: scale(0.95); }
     #sendBtn:disabled { background: var(--border); cursor: not-allowed; }
-
     #sendBtn svg { color: white; }
 
-    .input-hint {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 8px;
-      text-align: center;
-    }
+    .input-hint { font-size: 11px; color: var(--text-muted); margin-top: 8px; text-align: center; }
 
     /* ── Connection banner ───────────────────────────────────────────────── */
     .conn-banner {
@@ -538,9 +580,24 @@
 
     <header class="chat-header">
       <div class="header-title">Ali Real Estate Assistant</div>
-      <div class="header-status">
-        <div class="status-dot" id="statusDot"></div>
-        <span id="statusText">Connecting…</span>
+      <div class="header-right">
+        <!-- Speaking badge (visible while TTS audio plays) -->
+        <div class="speaking-badge" id="speakingBadge">
+          <div class="speaking-dot"></div>
+          Speaking
+        </div>
+        <!-- Speaker toggle -->
+        <button
+          class="speaker-btn"
+          id="speakerBtn"
+          title="Toggle voice output"
+          onclick="toggleTTS()"
+        >🔇</button>
+        <!-- Connection status -->
+        <div class="header-status">
+          <div class="status-dot" id="statusDot"></div>
+          <span id="statusText">Connecting…</span>
+        </div>
       </div>
     </header>
 
@@ -562,11 +619,14 @@
       <div class="input-wrap">
         <textarea
           id="messageInput"
-          placeholder="Type your message…"
+          placeholder="Type or speak your message…"
           rows="1"
           onkeydown="handleKey(event)"
           oninput="autoResize(this)"
         ></textarea>
+        <!-- Mic button (NEW) -->
+        <button id="micBtn" onclick="toggleRecording()" title="Hold to speak" disabled>🎙️</button>
+        <!-- Send button -->
         <button id="sendBtn" onclick="sendMessage()" disabled title="Send">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -574,7 +634,7 @@
           </svg>
         </button>
       </div>
-      <p class="input-hint">Press Enter to send · Shift+Enter for new line</p>
+      <p class="input-hint">Enter to send · Shift+Enter for new line · 🎙️ to speak · 🔊 for voice output</p>
     </div>
 
   </main>
@@ -591,9 +651,19 @@
   let ws             = null;
   let sessionId      = null;
   let isStreaming    = false;
-  let currentBubble = null;   // direct DOM reference — never use getElementById for this
-  let currentMeta   = null;   // direct DOM reference for the timestamp element
+  let currentBubble  = null;
+  let currentMeta    = null;
   let reconnectTimer = null;
+
+  // ── Voice input state ──────────────────────────────────────────────────────
+  let mediaRecorder  = null;
+  let audioChunks    = [];
+  let isRecording    = false;
+
+  // ── TTS / audio queue state ────────────────────────────────────────────────
+  let ttsEnabled    = false;   // toggled by the speaker button
+  let audioQueue    = [];      // array of ObjectURLs waiting to play
+  let isSpeaking    = false;   // true while any audio chunk is playing
 
   // ── Init ───────────────────────────────────────────────────────────────────
   async function init() {
@@ -620,6 +690,7 @@
     ws.onopen = () => {
       setStatus('online', 'Connected');
       document.getElementById('sendBtn').disabled = false;
+      document.getElementById('micBtn').disabled  = false;
       document.getElementById('connBanner').classList.remove('visible');
       clearTimeout(reconnectTimer);
     };
@@ -627,6 +698,7 @@
     ws.onclose = () => {
       setStatus('', 'Disconnected');
       document.getElementById('sendBtn').disabled = true;
+      document.getElementById('micBtn').disabled  = true;
       document.getElementById('connBanner').classList.add('visible');
       reconnectTimer = setTimeout(connectWS, 3000);
     };
@@ -643,6 +715,9 @@
     switch (frame.type) {
       case 'token':
         appendToken(frame.data);
+        break;
+      case 'audio_chunk':          // NEW — enqueue audio for sequential playback
+        enqueueAudioChunk(frame.data);
         break;
       case 'done':
         finishStreaming();
@@ -664,7 +739,7 @@
   // ── Sending ────────────────────────────────────────────────────────────────
   function sendMessage() {
     const input = document.getElementById('messageInput');
-    const text = input.value.trim();
+    const text  = input.value.trim();
     if (!text || isStreaming || !ws || ws.readyState !== WebSocket.OPEN) return;
 
     hideWelcome();
@@ -673,7 +748,8 @@
     autoResize(input);
 
     beginStreaming();
-    ws.send(JSON.stringify({ session_id: sessionId, message: text }));
+    // Include voice_enabled so the backend knows whether to send audio_chunk frames
+    ws.send(JSON.stringify({ session_id: sessionId, message: text, voice_enabled: ttsEnabled }));
   }
 
   function sendQuick(text) {
@@ -693,9 +769,9 @@
     isStreaming = true;
     setStatus('typing', 'Ali is typing…');
     document.getElementById('sendBtn').disabled = true;
+    document.getElementById('micBtn').disabled  = true;
 
-    // Build the new message row
-    const row = document.createElement('div');
+    const row    = document.createElement('div');
     row.className = 'message ali';
 
     const avatar = document.createElement('div');
@@ -703,11 +779,8 @@
     avatar.textContent = '🏠';
 
     const wrapper = document.createElement('div');
-
-    // ── FIX: store direct references, never use a static id ──
-    const bubble = document.createElement('div');
+    const bubble  = document.createElement('div');
     bubble.className = 'bubble streaming';
-
     const meta = document.createElement('div');
     meta.className = 'message-meta';
 
@@ -717,12 +790,8 @@
     row.appendChild(wrapper);
 
     document.getElementById('messages').appendChild(row);
-
-    // Keep module-level references so appendToken / finishStreaming
-    // always write to THIS turn's elements, not a stale earlier one.
     currentBubble = bubble;
     currentMeta   = meta;
-
     scrollBottom();
   }
 
@@ -737,19 +806,197 @@
     if (currentBubble) {
       currentBubble.classList.remove('streaming');
       if (currentMeta) currentMeta.textContent = formatTime();
-      // Clear references so a stale token from a race can't corrupt a future bubble
       currentBubble = null;
       currentMeta   = null;
     }
     setStatus('online', 'Connected');
     document.getElementById('sendBtn').disabled = false;
+    document.getElementById('micBtn').disabled  = false;
     scrollBottom();
+  }
+
+  // ── TTS audio queue (NEW) ──────────────────────────────────────────────────
+
+  /**
+   * Decode a base64 WAV string, create an object URL, and push onto the queue.
+   * If nothing is playing yet, kick off playback immediately.
+   */
+  function enqueueAudioChunk(b64wav) {
+    if (!ttsEnabled) return;
+
+    // Decode base64 → Uint8Array → Blob → ObjectURL
+    const binary = atob(b64wav);
+    const bytes  = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const blob = new Blob([bytes], { type: 'audio/wav' });
+    const url  = URL.createObjectURL(blob);
+
+    audioQueue.push(url);
+    if (!isSpeaking) playNextChunk();
+  }
+
+  /** Play the next URL in the queue (if any). */
+  function playNextChunk() {
+    if (!audioQueue.length) {
+      isSpeaking = false;
+      document.getElementById('speakingBadge').classList.remove('visible');
+      return;
+    }
+
+    isSpeaking = true;
+    document.getElementById('speakingBadge').classList.add('visible');
+
+    const url   = audioQueue.shift();
+    const audio = new Audio(url);
+
+    audio.onended = () => {
+      URL.revokeObjectURL(url);
+      playNextChunk();
+    };
+    audio.onerror = () => {
+      URL.revokeObjectURL(url);
+      playNextChunk();
+    };
+
+    audio.play().catch(() => {
+      // Autoplay blocked — browser requires a user gesture first.
+      // The user has already clicked a button, so this should be rare.
+      URL.revokeObjectURL(url);
+      playNextChunk();
+    });
+  }
+
+  /** Stop any playing audio and drain the queue. */
+  function clearAudioQueue() {
+    audioQueue.forEach(url => URL.revokeObjectURL(url));
+    audioQueue = [];
+    isSpeaking = false;
+    document.getElementById('speakingBadge').classList.remove('visible');
+  }
+
+  // ── Speaker toggle (NEW) ───────────────────────────────────────────────────
+  function toggleTTS() {
+    ttsEnabled = !ttsEnabled;
+    const btn = document.getElementById('speakerBtn');
+    btn.textContent = ttsEnabled ? '🔊' : '🔇';
+    btn.classList.toggle('active', ttsEnabled);
+    if (!ttsEnabled) clearAudioQueue();
+  }
+
+  // ── Microphone / ASR (NEW) ─────────────────────────────────────────────────
+
+  /** Toggle recording on/off. */
+  async function toggleRecording() {
+    if (isStreaming) return;
+
+    if (isRecording) {
+      // Second click — stop and transcribe
+      mediaRecorder.stop();
+      return;
+    }
+
+    // First click — request mic and start recording
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunks  = [];
+
+      mediaRecorder = new MediaRecorder(stream, { mimeType: _bestMimeType() });
+
+      mediaRecorder.ondataavailable = e => {
+        if (e.data && e.data.size > 0) audioChunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        // Release mic immediately
+        stream.getTracks().forEach(t => t.stop());
+        isRecording = false;
+
+        setMicState('processing');
+        const mimeType = mediaRecorder.mimeType || 'audio/webm';
+        const blob     = new Blob(audioChunks, { type: mimeType });
+        await transcribeBlob(blob, mimeType);
+        setMicState('idle');
+      };
+
+      mediaRecorder.start();
+      isRecording = true;
+      setMicState('recording');
+
+    } catch (err) {
+      console.error('Microphone error:', err);
+      showError('Microphone access denied. Check browser permissions.');
+      setMicState('idle');
+    }
+  }
+
+  /** Choose the best supported audio MIME type for MediaRecorder. */
+  function _bestMimeType() {
+    const candidates = [
+      'audio/webm;codecs=opus',
+      'audio/webm',
+      'audio/ogg;codecs=opus',
+      'audio/mp4',
+    ];
+    return candidates.find(t => MediaRecorder.isTypeSupported(t)) || '';
+  }
+
+  /**
+   * POST the audio blob to /transcribe, then auto-fill the input
+   * and send the message on success.
+   */
+  async function transcribeBlob(blob, mimeType) {
+    const formData = new FormData();
+    formData.append('file', blob, 'recording' + _mimeToExt(mimeType));
+
+    try {
+      const res  = await fetch(`${API_BASE}/transcribe`, { method: 'POST', body: formData });
+      const data = await res.json();
+
+      if (data.text && data.text.trim()) {
+        const input = document.getElementById('messageInput');
+        input.value = data.text.trim();
+        autoResize(input);
+        sendMessage();   // auto-send the transcribed text
+      } else {
+        showError('No speech detected. Please try again.');
+      }
+    } catch (err) {
+      console.error('Transcription error:', err);
+      showError('Transcription failed. Is the backend running?');
+    }
+  }
+
+  function _mimeToExt(mime) {
+    if (mime.includes('ogg'))  return '.ogg';
+    if (mime.includes('mp4'))  return '.mp4';
+    return '.webm';
+  }
+
+  /** Update mic button appearance based on state. */
+  function setMicState(state) {
+    const btn = document.getElementById('micBtn');
+    btn.classList.remove('recording', 'processing');
+
+    switch (state) {
+      case 'recording':
+        btn.classList.add('recording');
+        btn.title = 'Click to stop recording';
+        break;
+      case 'processing':
+        btn.classList.add('processing');
+        btn.disabled = true;
+        btn.title = 'Transcribing…';
+        break;
+      default: // idle
+        btn.disabled = isStreaming;
+        btn.title = 'Click to speak';
+    }
   }
 
   // ── UI helpers ─────────────────────────────────────────────────────────────
   function appendMessage(role, text) {
     const isUser = role === 'user';
-    const row = document.createElement('div');
+    const row    = document.createElement('div');
     row.className = `message ${isUser ? 'user' : 'ali'}`;
 
     const avatar = document.createElement('div');
@@ -757,8 +1004,7 @@
     avatar.textContent = isUser ? '👤' : '🏠';
 
     const wrapper = document.createElement('div');
-
-    const bubble = document.createElement('div');
+    const bubble  = document.createElement('div');
     bubble.className = 'bubble';
     bubble.textContent = text;
 
@@ -771,7 +1017,6 @@
     wrapper.appendChild(meta);
     row.appendChild(avatar);
     row.appendChild(wrapper);
-
     document.getElementById('messages').appendChild(row);
     scrollBottom();
   }
@@ -793,7 +1038,7 @@
     const short = id => id ? id.slice(0, 8) + '…' : '—';
     document.getElementById('sideSessionId').textContent = short(state.session_id);
     const stageEl = document.getElementById('sideStage');
-    const stage = state.stage || 'greeting';
+    const stage   = state.stage || 'greeting';
     stageEl.innerHTML = `<span class="stage-badge stage-${stage}">${stage.replace('_', ' ')}</span>`;
     document.getElementById('sideCategory').textContent = state.selected_category || '—';
     document.getElementById('sideSubtype').textContent  = state.selected_subtype  || '—';
@@ -823,6 +1068,7 @@
   // ── New session ────────────────────────────────────────────────────────────
   async function newSession() {
     if (isStreaming) return;
+    clearAudioQueue();
     document.getElementById('messages').innerHTML =
       `<div class="welcome" id="welcome">
         <div class="welcome-icon">🏡</div>
