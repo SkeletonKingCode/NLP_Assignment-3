@@ -748,8 +748,8 @@
     autoResize(input);
 
     beginStreaming();
-    // Include voice_enabled so the backend knows whether to send audio_chunk frames
-    ws.send(JSON.stringify({ session_id: sessionId, message: text, voice_enabled: ttsEnabled }));
+    // Include voice flag so the backend knows whether to send audio_chunk frames
+    ws.send(JSON.stringify({ session_id: sessionId, message: text, voice: ttsEnabled }));
   }
 
   function sendQuick(text) {
@@ -946,7 +946,7 @@
    */
   async function transcribeBlob(blob, mimeType) {
     const formData = new FormData();
-    formData.append('file', blob, 'recording' + _mimeToExt(mimeType));
+    formData.append('audio', blob, 'recording' + _mimeToExt(mimeType));
 
     try {
       const res  = await fetch(`${API_BASE}/transcribe`, { method: 'POST', body: formData });
