@@ -1,0 +1,132 @@
+{
+  "info": {
+    "name": "Ali Real Estate Chatbot",
+    "description": "API collection for the Ali Real Estate Conversational AI system.\n\nLocal server: http://localhost:8000\nWebSocket: ws://localhost:8000/ws/chat\n\nWebSocket payload format:\n  → Client: {\"session_id\": \"<uuid>\", \"message\": \"<text>\", \"voice\": true|false}\n  ← Server: {\"type\": \"token|done|state|error|audio_chunk|session_created\", \"data\": \"...\"}",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "session_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        },
+        "description": "Liveness probe. Returns server status, active WebSocket connection count, TTS availability, and timestamp."
+      },
+      "response": []
+    },
+    {
+      "name": "Create Session",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "pm.collectionVariables.set('session_id', jsonData.session_id);",
+              "pm.test('Session created', function () {",
+              "    pm.response.to.have.status(201);",
+              "    pm.expect(jsonData.session_id).to.be.a('string');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/session",
+          "host": ["{{base_url}}"],
+          "path": ["session"]
+        },
+        "description": "Create a new conversation session. The returned session_id is automatically saved as a collection variable for use in subsequent requests."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Session State",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/session/{{session_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["session", "{{session_id}}"]
+        },
+        "description": "Retrieve the current state of a session: stage, selected category, subtype, price, and turn count."
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Session",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/session/{{session_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["session", "{{session_id}}"]
+        },
+        "description": "Delete a session immediately. Returns 404 if the session does not exist or has expired."
+      },
+      "response": []
+    },
+    {
+      "name": "Transcribe Audio",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "audio",
+              "type": "file",
+              "src": "",
+              "description": "Audio file to transcribe (WebM, WAV, MP3, OGG, etc.)"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/transcribe",
+          "host": ["{{base_url}}"],
+          "path": ["transcribe"]
+        },
+        "description": "Upload an audio file for speech-to-text transcription using faster-whisper. Returns {\"text\": \"<transcribed string>\"}."
+      },
+      "response": []
+    },
+    {
+      "name": "WebSocket Chat (Reference)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/ws/chat",
+          "host": ["{{base_url}}"],
+          "path": ["ws", "chat"]
+        },
+        "description": "WebSocket endpoint for real-time streaming chat.\n\nConnect via: ws://localhost:8000/ws/chat\n\nSend JSON:\n{\n  \"session_id\": \"<uuid>\",\n  \"message\": \"I want to buy a house\",\n  \"voice\": true\n}\n\nReceive JSON frames:\n- {\"type\": \"token\", \"data\": \"<token>\"}         — streamed LLM tokens\n- {\"type\": \"audio_chunk\", \"data\": \"<base64>\"}   — TTS audio (when voice=true)\n- {\"type\": \"done\", \"data\": \"\"}                  — end of turn\n- {\"type\": \"state\", \"data\": {session_info}}      — updated session state\n- {\"type\": \"session_created\", \"data\": \"<id>\"}    — auto-created session\n- {\"type\": \"error\", \"data\": \"<message>\"}         — error\n\nNote: Postman's HTTP client cannot test WebSockets directly. Use the Postman WebSocket Request tab or a tool like wscat:\n  wscat -c ws://localhost:8000/ws/chat"
+      },
+      "response": []
+    }
+  ]
+}
