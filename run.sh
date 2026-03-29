@@ -10,7 +10,7 @@ PID_FILE="$SCRIPT_DIR/.ali_pids"
 MODEL_NAME="ali-realestate"
 
 # ── Voice model config ────────────────────────────────────────────────────────
-VOICES_DIR="$SCRIPT_DIR/voices"
+VOICES_DIR="$SCRIPT_DIR/backend/Voice/models"
 PIPER_VOICE_NAME="en_US-lessac-medium"
 PIPER_ONNX="$VOICES_DIR/${PIPER_VOICE_NAME}.onnx"
 PIPER_JSON="$VOICES_DIR/${PIPER_VOICE_NAME}.onnx.json"
