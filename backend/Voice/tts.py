@@ -3,19 +3,7 @@ backend/Voice/tts.py
 
 Text-to-Speech using piper-tts.
 Loads the voice model once (lazy, thread-safe).
-Exposes a single blocking function: synthesize(text) -> bytes  (WAV)
-
-Model setup
------------
-Download the model files before starting the server:
-
-    MODEL_DIR=backend/Voice/models
-    mkdir -p $MODEL_DIR
-    BASE=https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium
-    curl -L "$BASE/en_US-lessac-medium.onnx"      -o "$MODEL_DIR/en_US-lessac-medium.onnx"
-    curl -L "$BASE/en_US-lessac-medium.onnx.json" -o "$MODEL_DIR/en_US-lessac-medium.onnx.json"
-
-Override model path via the PIPER_MODEL_PATH environment variable.
+Exposes a single blocking function: synthesize(text) -> bytes (WAV)
 """
 
 import io
@@ -23,6 +11,10 @@ import os
 import threading
 import wave
 import logging
+import subprocess
+import tempfile
+import struct
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -34,71 +26,82 @@ _DEFAULT_MODEL = os.path.join(
     os.path.dirname(__file__), "models", "en_US-lessac-medium.onnx"
 )
 PIPER_MODEL_PATH = os.environ.get("PIPER_MODEL_PATH", _DEFAULT_MODEL)
+PIPER_EXECUTABLE = os.environ.get("PIPER_EXECUTABLE", "piper")
 
 # ---------------------------------------------------------------------------
 # Lazy singleton
 # ---------------------------------------------------------------------------
 
-_voice      = None
+_voice = None
 _voice_lock = threading.Lock()
-_available  = None   # cached availability flag
+_available = None
 
 
 def is_available() -> bool:
     """Return True if piper and its model file are both present."""
     global _available
     if _available is None:
+        # Check if piper command exists
+        piper_exists = False
         try:
-            import piper  # noqa: F401
-            _available = os.path.isfile(PIPER_MODEL_PATH)
-            if not _available:
+            result = subprocess.run(
+                [PIPER_EXECUTABLE, "--help"],
+                capture_output=True,
+                text=True,
+                timeout=2
+            )
+            piper_exists = result.returncode == 0
+        except (subprocess.SubprocessError, FileNotFoundError):
+            pass
+        
+        _available = piper_exists and os.path.isfile(PIPER_MODEL_PATH)
+        
+        if not _available:
+            if not piper_exists:
                 logger.warning(
-                    "Piper model not found at '%s'. TTS disabled. "
-                    "See backend/Voice/tts.py docstring for download instructions.",
+                    "Piper executable not found. TTS disabled. "
+                    "Install with: pip install piper-tts"
+                )
+            elif not os.path.isfile(PIPER_MODEL_PATH):
+                logger.warning(
+                    "Piper model not found at '%s'. TTS disabled.",
                     PIPER_MODEL_PATH,
                 )
-        except ImportError:
-            _available = False
-            logger.warning("piper-tts not installed. TTS disabled.")
     return _available
 
 
-def _get_voice():
-    """Return the PiperVoice instance, loading it on first call."""
-    global _voice
-    if _voice is None:
-        with _voice_lock:
-            if _voice is None:
-                from piper.voice import PiperVoice
-                logger.info("Loading Piper voice from '%s'…", PIPER_MODEL_PATH)
-                _voice = PiperVoice.load(PIPER_MODEL_PATH, use_cuda=False)
-                logger.info("Piper voice loaded.")
-    return _voice
-
-
-# ---------------------------------------------------------------------------
-# Public API
-# ---------------------------------------------------------------------------
-
 def preload() -> None:
-    """Call at startup to warm up the model (no-op if unavailable)."""
+    """Preload TTS model (no-op, we'll use subprocess)."""
     if is_available():
-        _get_voice()
+        logger.info("Piper TTS ready (using subprocess)")
+
+
+def _create_wav_header(sample_rate: int, bits_per_sample: int, channels: int, data_size: int) -> bytes:
+    """Create a WAV file header."""
+    byte_rate = sample_rate * channels * (bits_per_sample // 8)
+    block_align = channels * (bits_per_sample // 8)
+    
+    header = struct.pack('<4sI4s', b'RIFF', 36 + data_size, b'WAVE')
+    header += struct.pack('<4sI', b'fmt ', 16)
+    header += struct.pack('<HHIIHH', 1, channels, sample_rate, byte_rate, block_align, bits_per_sample)
+    header += struct.pack('<4sI', b'data', data_size)
+    
+    return header
 
 
 def synthesize(text: str) -> bytes:
-    """Convert text to WAV audio bytes.
-
+    """Convert text to WAV audio bytes using piper subprocess.
+    
     Parameters
     ----------
     text : str
         The sentence or phrase to speak.
-
+        
     Returns
     -------
     bytes
         A valid WAV file in memory.
-
+        
     Raises
     ------
     RuntimeError
@@ -106,22 +109,163 @@ def synthesize(text: str) -> bytes:
     """
     if not is_available():
         raise RuntimeError(
-            "Piper TTS is not available. "
-            "Install piper-tts and download the model file."
+            "Piper TTS is not available. Install piper-tts and download the model file."
         )
+    
+    if not text or not text.strip():
+        raise ValueError("Text to synthesize cannot be empty")
+    
+    # Use subprocess approach which is more reliable across versions
+    return _synthesize_with_subprocess(text)
 
-    voice = _get_voice()
 
-    # Piper writes raw PCM frames but never sets the WAV header fields,
-    # so we must configure them ourselves before calling synthesize().
-    # Piper always outputs mono, 16-bit (signed int) PCM.
-    sample_rate: int = voice.config.sample_rate  # e.g. 22050
+def _synthesize_with_subprocess(text: str) -> bytes:
+    """Use piper command-line tool to synthesize."""
+    
+    # Create temporary files for raw audio and WAV
+    with tempfile.NamedTemporaryFile(suffix='.raw', delete=False) as raw_tmp:
+        raw_path = raw_tmp.name
+    
+    with tempfile.NamedTemporaryFile(suffix='.json', delete=False) as json_tmp:
+        json_path = json_tmp.name
+    
+    try:
+        # Get model config to know sample rate
+        # First, try to read the JSON config file
+        sample_rate = 22050  # Default fallback
+        model_json_path = PIPER_MODEL_PATH + '.json'
+        
+        if os.path.exists(model_json_path):
+            try:
+                import json
+                with open(model_json_path, 'r') as f:
+                    config = json.load(f)
+                    sample_rate = config.get('audio', {}).get('sample_rate', 22050)
+            except Exception as e:
+                logger.warning(f"Could not read model config: {e}")
+        
+        # Run piper command to generate raw audio
+        cmd = [
+            PIPER_EXECUTABLE,
+            "--model", PIPER_MODEL_PATH,
+            "--output_file", raw_path,
+            "--output-raw",  # Output raw audio (no WAV header)
+        ]
+        
+        logger.debug(f"Running piper command: {' '.join(cmd)}")
+        
+        process = subprocess.Popen(
+            cmd,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        
+        # Send text to stdin
+        stdout, stderr = process.communicate(input=text, timeout=15)
+        
+        if process.returncode != 0:
+            error_msg = stderr if stderr else "Unknown error"
+            raise RuntimeError(f"Piper failed with code {process.returncode}: {error_msg}")
+        
+        # Read the raw audio data
+        if not os.path.exists(raw_path) or os.path.getsize(raw_path) == 0:
+            raise RuntimeError("Piper produced no audio output")
+        
+        with open(raw_path, 'rb') as f:
+            raw_audio = f.read()
+        
+        # Wrap raw audio in WAV header
+        # Piper outputs 16-bit mono PCM
+        channels = 1
+        bits_per_sample = 16
+        data_size = len(raw_audio)
+        
+        # Create WAV header
+        wav_header = _create_wav_header(sample_rate, bits_per_sample, channels, data_size)
+        
+        # Combine header and raw audio
+        wav_bytes = wav_header + raw_audio
+        
+        return wav_bytes
+        
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait()
+        raise RuntimeError("Piper synthesis timed out after 15 seconds")
+    except Exception as e:
+        raise RuntimeError(f"Piper synthesis failed: {e}")
+    finally:
+        # Clean up temporary files
+        for path in [raw_path, json_path]:
+            if os.path.exists(path):
+                try:
+                    os.unlink(path)
+                except Exception:
+                    pass
 
-    buf = io.BytesIO()
-    with wave.open(buf, "wb") as wav_file:
-        wav_file.setnchannels(1)       # mono
-        wav_file.setsampwidth(2)       # 16-bit = 2 bytes
-        wav_file.setframerate(sample_rate)
-        voice.synthesize(text, wav_file)
 
-    return buf.getvalue()
+# Alternative implementation using piper's Python API if available
+def _synthesize_with_piper_package(text: str) -> bytes:
+    """Alternative: Use piper Python package if installed."""
+    try:
+        from piper import PiperVoice
+        
+        voice = PiperVoice.load(PIPER_MODEL_PATH)
+        
+        # Create WAV file in memory
+        wav_buffer = io.BytesIO()
+        
+        # Write WAV header
+        with wave.open(wav_buffer, 'wb') as wav_file:
+            wav_file.setnchannels(1)
+            wav_file.setsampwidth(2)  # 16-bit = 2 bytes
+            wav_file.setframerate(voice.config.sample_rate)
+            
+            # Synthesize and write audio chunks
+            # Different piper versions have different APIs
+            if hasattr(voice, 'synthesize'):
+                result = voice.synthesize(text)
+                if isinstance(result, bytes):
+                    wav_file.writeframes(result)
+                elif hasattr(result, '__iter__'):
+                    for chunk in result:
+                        wav_file.writeframes(chunk)
+            elif hasattr(voice, 'synthesize_stream'):
+                for chunk in voice.synthesize_stream(text):
+                    wav_file.writeframes(chunk)
+            else:
+                # Fallback: use pipe method
+                audio_bytes = voice.pipe(text.encode('utf-8'))
+                wav_file.writeframes(audio_bytes)
+        
+        return wav_buffer.getvalue()
+        
+    except ImportError:
+        raise RuntimeError("piper Python package not installed")
+    except Exception as e:
+        raise RuntimeError(f"Piper Python API failed: {e}")
+
+
+# For testing
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    
+    # Test synthesis
+    test_text = "Hello, this is a test of the text to speech system."
+    
+    if is_available():
+        print(f"TTS is available. Testing with: '{test_text}'")
+        try:
+            audio_bytes = synthesize(test_text)
+            print(f"Generated {len(audio_bytes)} bytes of WAV audio")
+            
+            # Save to file for testing
+            with open("test_output.wav", "wb") as f:
+                f.write(audio_bytes)
+            print("Saved to test_output.wav")
+        except Exception as e:
+            print(f"Error: {e}")
+    else:
+        print("TTS not available. Check piper installation and model file.")
