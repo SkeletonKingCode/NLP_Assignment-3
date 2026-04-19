@@ -110,8 +110,18 @@ def synthesize(text: str) -> bytes:
             "Install piper-tts and download the model file."
         )
 
-    voice   = _get_voice()
-    buf     = io.BytesIO()
+    voice = _get_voice()
+
+    # Piper writes raw PCM frames but never sets the WAV header fields,
+    # so we must configure them ourselves before calling synthesize().
+    # Piper always outputs mono, 16-bit (signed int) PCM.
+    sample_rate: int = voice.config.sample_rate  # e.g. 22050
+
+    buf = io.BytesIO()
     with wave.open(buf, "wb") as wav_file:
+        wav_file.setnchannels(1)       # mono
+        wav_file.setsampwidth(2)       # 16-bit = 2 bytes
+        wav_file.setframerate(sample_rate)
         voice.synthesize(text, wav_file)
+
     return buf.getvalue()

@@ -37,8 +37,7 @@
       --font-body: 'DM Sans', system-ui, sans-serif;
     }
 
-    html,
-    body {
+    html, body {
       height: 100%;
       background: var(--bg);
       color: var(--text);
@@ -119,9 +118,7 @@
       border-color: var(--emerald);
     }
 
-    .new-chat-btn svg {
-      flex-shrink: 0;
-    }
+    .new-chat-btn svg { flex-shrink: 0; }
 
     .session-info {
       margin-top: auto;
@@ -147,9 +144,7 @@
       font-size: 12px;
     }
 
-    .session-row .label {
-      color: var(--text-muted);
-    }
+    .session-row .label { color: var(--text-muted); }
 
     .session-row .value {
       color: var(--emerald);
@@ -170,29 +165,10 @@
       text-transform: capitalize;
     }
 
-    .stage-greeting {
-      background: var(--surface2);
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-    }
-
-    .stage-category_selection {
-      background: rgba(16, 185, 129, .15);
-      color: var(--emerald);
-      border: 1px solid var(--emerald-dim);
-    }
-
-    .stage-subtype_selection {
-      background: rgba(245, 158, 11, .15);
-      color: var(--gold);
-      border: 1px solid var(--gold-dim);
-    }
-
-    .stage-closing {
-      background: rgba(59, 130, 246, .15);
-      color: #60a5fa;
-      border: 1px solid #1e40af;
-    }
+    .stage-greeting        { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+    .stage-category_selection { background: rgba(16,185,129,.15); color: var(--emerald); border: 1px solid var(--emerald-dim); }
+    .stage-subtype_selection  { background: rgba(245,158,11,.15); color: var(--gold);    border: 1px solid var(--gold-dim); }
+    .stage-closing            { background: rgba(59,130,246,.15);  color: #60a5fa;        border: 1px solid #1e40af; }
 
     .inventory-hint {
       margin-top: 16px;
@@ -201,11 +177,7 @@
       line-height: 1.8;
     }
 
-    .inventory-hint strong {
-      color: var(--gold);
-      display: block;
-      margin-bottom: 4px;
-    }
+    .inventory-hint strong { color: var(--gold); display: block; margin-bottom: 4px; }
 
     .chat-area {
       display: flex;
@@ -224,17 +196,9 @@
       flex-shrink: 0;
     }
 
-    .header-title {
-      font-family: var(--font-head);
-      font-size: 16px;
-      font-weight: 500;
-    }
+    .header-title { font-family: var(--font-head); font-size: 16px; font-weight: 500; }
 
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
+    .header-right { display: flex; align-items: center; gap: 14px; }
 
     .header-status {
       display: flex;
@@ -253,10 +217,19 @@
     }
 
     .status-dot.online { background: var(--emerald); }
-    .status-dot.typing {
-      background: var(--gold);
-      animation: pulse 1s infinite;
+    .status-dot.typing { background: var(--gold); animation: pulse 1s infinite; }
+
+    /* tts-unavailable banner in header */
+    .tts-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      display: none;
     }
+
+    .tts-badge.visible { display: inline-block; }
 
     .messages {
       flex: 1;
@@ -270,10 +243,7 @@
 
     .messages::-webkit-scrollbar { width: 6px; }
     .messages::-webkit-scrollbar-track { background: transparent; }
-    .messages::-webkit-scrollbar-thumb {
-      background: var(--border);
-      border-radius: 3px;
-    }
+    .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
     .welcome {
       display: flex;
@@ -287,7 +257,7 @@
       animation: fadeIn 0.5s ease;
     }
 
-    .welcome-icon { font-size: 52px; filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.4)); }
+    .welcome-icon { font-size: 52px; filter: drop-shadow(0 0 20px rgba(16,185,129,0.4)); }
 
     .welcome h2 {
       font-family: var(--font-head);
@@ -300,13 +270,7 @@
 
     .welcome p { color: var(--text-muted); max-width: 400px; font-size: 14px; }
 
-    .quick-prompts {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-      margin-top: 8px;
-    }
+    .quick-prompts { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 8px; }
 
     .quick-btn {
       padding: 8px 14px;
@@ -320,11 +284,7 @@
       font-family: var(--font-body);
     }
 
-    .quick-btn:hover {
-      border-color: var(--emerald);
-      color: var(--emerald);
-      background: rgba(16, 185, 129, 0.06);
-    }
+    .quick-btn:hover { border-color: var(--emerald); color: var(--emerald); background: rgba(16,185,129,0.06); }
 
     .message {
       display: flex;
@@ -339,15 +299,9 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.3; }
-    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
     .message.user { flex-direction: row-reverse; align-self: flex-end; }
     .message.ali  { align-self: flex-start; }
@@ -377,17 +331,8 @@
       white-space: pre-wrap;
     }
 
-    .message.user .bubble {
-      background: var(--user-bg);
-      border: 1px solid var(--emerald-dim);
-      border-bottom-right-radius: 4px;
-    }
-
-    .message.ali .bubble {
-      background: var(--ali-bg);
-      border: 1px solid var(--border);
-      border-bottom-left-radius: 4px;
-    }
+    .message.user .bubble { background: var(--user-bg); border: 1px solid var(--emerald-dim); border-bottom-right-radius: 4px; }
+    .message.ali  .bubble { background: var(--ali-bg);  border: 1px solid var(--border);      border-bottom-left-radius: 4px; }
 
     .bubble.streaming::after {
       content: '▋';
@@ -399,7 +344,7 @@
 
     @keyframes blink { 50% { opacity: 0; } }
 
-    /* ── message meta row (time + speak button) ── */
+    /* ── message meta row ── */
     .message-meta {
       display: flex;
       align-items: center;
@@ -426,16 +371,15 @@
       flex-shrink: 0;
     }
 
-    .speak-btn:hover { color: var(--emerald); background: rgba(16,185,129,0.08); }
+    .speak-btn:hover:not(:disabled) { color: var(--emerald); background: rgba(16,185,129,0.08); }
+    .speak-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-    .speak-btn.speaking {
-      color: var(--emerald);
-      animation: pulse 0.8s infinite;
-    }
+    .speak-btn.loading { color: var(--gold); animation: pulse 0.8s infinite; }
+    .speak-btn.speaking { color: var(--emerald); animation: pulse 0.8s infinite; }
 
     .error-bubble {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
       color: var(--error);
       padding: 10px 14px;
       border-radius: var(--radius);
@@ -498,21 +442,12 @@
 
     #micBtn:hover:not(:disabled) { background: var(--surface); border-color: var(--gold); }
     #micBtn:disabled { opacity: 0.35; cursor: not-allowed; }
-
-    #micBtn.recording {
-      background: rgba(239, 68, 68, 0.15);
-      border-color: var(--error);
-      animation: micPulse 1s ease-in-out infinite;
-    }
-
-    #micBtn.processing {
-      background: rgba(245, 158, 11, 0.15);
-      border-color: var(--gold);
-    }
+    #micBtn.recording { background: rgba(239,68,68,0.15); border-color: var(--error); animation: micPulse 1s ease-in-out infinite; }
+    #micBtn.processing { background: rgba(245,158,11,0.15); border-color: var(--gold); }
 
     @keyframes micPulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-      50%       { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+      50%       { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
     }
 
     #sendBtn {
@@ -534,12 +469,7 @@
     #sendBtn:disabled { background: var(--border); cursor: not-allowed; }
     #sendBtn svg { color: white; }
 
-    .input-hint {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 8px;
-      text-align: center;
-    }
+    .input-hint { font-size: 11px; color: var(--text-muted); margin-top: 8px; text-align: center; }
 
     .conn-banner {
       display: none;
@@ -590,26 +520,11 @@
 
       <div class="session-info">
         <h3>Session</h3>
-        <div class="session-row">
-          <span class="label">ID</span>
-          <span class="value" id="sideSessionId">—</span>
-        </div>
-        <div class="session-row">
-          <span class="label">Stage</span>
-          <span class="value" id="sideStage">—</span>
-        </div>
-        <div class="session-row">
-          <span class="label">Category</span>
-          <span class="value" id="sideCategory">—</span>
-        </div>
-        <div class="session-row">
-          <span class="label">Subtype</span>
-          <span class="value" id="sideSubtype">—</span>
-        </div>
-        <div class="session-row">
-          <span class="label">Price</span>
-          <span class="value" id="sidePrice">—</span>
-        </div>
+        <div class="session-row"><span class="label">ID</span><span class="value" id="sideSessionId">—</span></div>
+        <div class="session-row"><span class="label">Stage</span><span class="value" id="sideStage">—</span></div>
+        <div class="session-row"><span class="label">Category</span><span class="value" id="sideCategory">—</span></div>
+        <div class="session-row"><span class="label">Subtype</span><span class="value" id="sideSubtype">—</span></div>
+        <div class="session-row"><span class="label">Price</span><span class="value" id="sidePrice">—</span></div>
       </div>
 
       <div class="inventory-hint">
@@ -623,6 +538,7 @@
       <header class="chat-header">
         <div class="header-title">Ali Real Estate Assistant</div>
         <div class="header-right">
+          <span class="tts-badge" id="ttsBadge">TTS unavailable</span>
           <div class="header-status">
             <div class="status-dot" id="statusDot"></div>
             <span id="statusText">Connecting…</span>
@@ -646,8 +562,8 @@
 
       <div class="input-area">
         <div class="input-wrap">
-          <textarea id="messageInput" placeholder="Type or speak your message…" rows="1" onkeydown="handleKey(event)"
-            oninput="autoResize(this)"></textarea>
+          <textarea id="messageInput" placeholder="Type or speak your message…" rows="1"
+            onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
           <button id="micBtn" onclick="toggleRecording()" title="Click to speak" disabled>🎙️</button>
           <button id="sendBtn" onclick="sendMessage()" disabled title="Send">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -669,33 +585,55 @@
       : `${window.location.protocol}//${window.location.host}`;
     const WS_BASE = API_BASE.replace(/^http/, 'ws');
 
-    let ws = null;
-    let sessionId = null;
-    let isStreaming = false;
+    let ws            = null;
+    let sessionId     = null;
+    let isStreaming   = false;
     let currentBubble = null;
-    let currentMeta = null;
+    let currentMeta   = null;
     let reconnectTimer = null;
 
     // mic state
     let mediaRecorder = null;
-    let audioChunks = [];
-    let isRecording = false;
+    let audioChunks   = [];
+    let isRecording   = false;
 
-    // ── TTS via Web Speech API ─────────────────────────────────────────────
-    // Tracks the currently active speak button so we can reset its style
-    let activeSpeakBtn = null;
+    // TTS state — only one clip plays at a time
+    let currentAudio    = null;   // the active HTMLAudioElement
+    let activeSpeakBtn  = null;   // the button that triggered it
 
-    function speakText(text, btn) {
-      // If something is already playing, cancel it first
-      if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
-        window.speechSynthesis.cancel();
-        // Reset previous button immediately
+    // ── Check piper availability on load ──────────────────────────────────
+    let ttsAvailable = false;
+
+    async function checkTTS() {
+      try {
+        const res  = await fetch(`${API_BASE}/health`);
+        const data = await res.json();
+        ttsAvailable = !!data.tts_available;
+        if (!ttsAvailable) {
+          document.getElementById('ttsBadge').classList.add('visible');
+        }
+      } catch (_) {
+        ttsAvailable = false;
+      }
+    }
+
+    // ── Piper TTS playback ─────────────────────────────────────────────────
+
+    /**
+     * POST text to /synth, get WAV back, play it.
+     * btn is the 🔊 button that was clicked.
+     */
+    async function speakText(text, btn) {
+      // Stop whatever is currently playing
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
         if (activeSpeakBtn) {
           activeSpeakBtn.textContent = '🔊';
-          activeSpeakBtn.classList.remove('speaking');
+          activeSpeakBtn.classList.remove('speaking', 'loading');
           activeSpeakBtn.title = 'Play';
         }
-        // If we clicked the same button, just stop — don't restart
+        // If the same button was clicked again, just stop
         if (activeSpeakBtn === btn) {
           activeSpeakBtn = null;
           return;
@@ -703,51 +641,100 @@
       }
 
       activeSpeakBtn = btn;
+      btn.textContent = '⏳';
+      btn.classList.add('loading');
+      btn.title = 'Loading…';
+
+      let wavUrl = null;
+      try {
+        const res = await fetch(`${API_BASE}/synth`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ text }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || `HTTP ${res.status}`);
+        }
+
+        const blob = await res.blob();
+        wavUrl = URL.createObjectURL(blob);
+
+      } catch (err) {
+        console.error('TTS error:', err);
+        btn.textContent = '🔊';
+        btn.classList.remove('loading');
+        btn.title = 'Play (failed)';
+        activeSpeakBtn = null;
+        return;
+      }
+
+      // Playback
       btn.textContent = '⏹';
+      btn.classList.remove('loading');
       btn.classList.add('speaking');
       btn.title = 'Stop';
 
-      const utt = new SpeechSynthesisUtterance(text);
-      utt.lang = 'en-US';
-      utt.rate = 1.0;
+      const audio = new Audio(wavUrl);
+      currentAudio = audio;
 
-      utt.onend = () => {
+      audio.onended = () => {
+        URL.revokeObjectURL(wavUrl);
         btn.textContent = '🔊';
         btn.classList.remove('speaking');
         btn.title = 'Play';
-        if (activeSpeakBtn === btn) activeSpeakBtn = null;
+        if (activeSpeakBtn === btn) {
+          currentAudio   = null;
+          activeSpeakBtn = null;
+        }
       };
 
-      utt.onerror = () => {
+      audio.onerror = () => {
+        URL.revokeObjectURL(wavUrl);
         btn.textContent = '🔊';
         btn.classList.remove('speaking');
         btn.title = 'Play';
-        if (activeSpeakBtn === btn) activeSpeakBtn = null;
+        if (activeSpeakBtn === btn) {
+          currentAudio   = null;
+          activeSpeakBtn = null;
+        }
       };
 
-      window.speechSynthesis.speak(utt);
+      audio.play().catch((err) => {
+        console.error('Audio play blocked:', err);
+        URL.revokeObjectURL(wavUrl);
+        btn.textContent = '🔊';
+        btn.classList.remove('speaking');
+        btn.title = 'Play';
+        currentAudio   = null;
+        activeSpeakBtn = null;
+      });
     }
 
+    /** Build a 🔊 speak button for a message. getText() is called on click. */
     function makeSpeakButton(getText) {
       const btn = document.createElement('button');
       btn.className = 'speak-btn';
       btn.textContent = '🔊';
-      btn.title = 'Play';
+      btn.title = ttsAvailable ? 'Play' : 'TTS unavailable';
+      btn.disabled = !ttsAvailable;
       btn.onclick = () => speakText(getText(), btn);
       return btn;
     }
 
     // ── Init ───────────────────────────────────────────────────────────────
     async function init() {
+      await checkTTS();
       await createSession();
       connectWS();
     }
 
     async function createSession() {
       try {
-        const res = await fetch(`${API_BASE}/session`, { method: 'POST' });
+        const res  = await fetch(`${API_BASE}/session`, { method: 'POST' });
         const data = await res.json();
-        sessionId = data.session_id;
+        sessionId  = data.session_id;
         updateSidebar({ session_id: sessionId, stage: 'greeting' });
       } catch (e) {
         showError('Could not reach the API server. Is it running?');
@@ -762,7 +749,7 @@
       ws.onopen = () => {
         setStatus('online', 'Connected');
         document.getElementById('sendBtn').disabled = false;
-        document.getElementById('micBtn').disabled = false;
+        document.getElementById('micBtn').disabled  = false;
         document.getElementById('connBanner').classList.remove('visible');
         clearTimeout(reconnectTimer);
       };
@@ -770,30 +757,21 @@
       ws.onclose = () => {
         setStatus('', 'Disconnected');
         document.getElementById('sendBtn').disabled = true;
-        document.getElementById('micBtn').disabled = true;
+        document.getElementById('micBtn').disabled  = true;
         document.getElementById('connBanner').classList.add('visible');
         reconnectTimer = setTimeout(connectWS, 3000);
       };
 
       ws.onerror = () => setStatus('', 'Error');
 
-      ws.onmessage = (event) => {
-        const frame = JSON.parse(event.data);
-        handleFrame(frame);
-      };
+      ws.onmessage = (event) => handleFrame(JSON.parse(event.data));
     }
 
     function handleFrame(frame) {
       switch (frame.type) {
-        case 'token':
-          appendToken(frame.data);
-          break;
-        case 'done':
-          finishStreaming();
-          break;
-        case 'state':
-          updateSidebar(frame.data);
-          break;
+        case 'token':           appendToken(frame.data);           break;
+        case 'done':            finishStreaming();                  break;
+        case 'state':           updateSidebar(frame.data);         break;
         case 'session_created':
           sessionId = frame.data;
           updateSidebar({ session_id: sessionId, stage: 'greeting' });
@@ -802,23 +780,22 @@
           finishStreaming();
           showError(frame.data);
           break;
-        // audio_chunk frames ignored — we use Web Speech API instead
+        // audio_chunk not used — speak buttons call /synth directly
       }
     }
 
     // ── Sending ────────────────────────────────────────────────────────────
     function sendMessage() {
       const input = document.getElementById('messageInput');
-      const text = input.value.trim();
+      const text  = input.value.trim();
       if (!text || isStreaming || !ws || ws.readyState !== WebSocket.OPEN) return;
 
       hideWelcome();
       appendMessage('user', text);
       input.value = '';
       autoResize(input);
-
       beginStreaming();
-      // voice: false — we don't need audio_chunk frames, using Web Speech API
+      // voice: false — speak buttons handle TTS on demand via /synth
       ws.send(JSON.stringify({ session_id: sessionId, message: text, voice: false }));
     }
 
@@ -828,10 +805,7 @@
     }
 
     function handleKey(e) {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-      }
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
     }
 
     // ── Streaming ──────────────────────────────────────────────────────────
@@ -839,7 +813,7 @@
       isStreaming = true;
       setStatus('typing', 'Ali is typing…');
       document.getElementById('sendBtn').disabled = true;
-      document.getElementById('micBtn').disabled = true;
+      document.getElementById('micBtn').disabled  = true;
 
       const row = document.createElement('div');
       row.className = 'message ali';
@@ -849,8 +823,7 @@
       avatar.textContent = '🏠';
 
       const wrapper = document.createElement('div');
-
-      const bubble = document.createElement('div');
+      const bubble  = document.createElement('div');
       bubble.className = 'bubble streaming';
 
       const meta = document.createElement('div');
@@ -860,10 +833,10 @@
       wrapper.appendChild(meta);
       row.appendChild(avatar);
       row.appendChild(wrapper);
-
       document.getElementById('messages').appendChild(row);
+
       currentBubble = bubble;
-      currentMeta = meta;
+      currentMeta   = meta;
       scrollBottom();
     }
 
@@ -878,9 +851,7 @@
       if (currentBubble) {
         currentBubble.classList.remove('streaming');
 
-        // Capture text now for the speak button closure
-        const bubble = currentBubble;
-
+        const bubble = currentBubble;  // capture for closure
         if (currentMeta) {
           const timeSpan = document.createElement('span');
           timeSpan.textContent = formatTime();
@@ -892,11 +863,11 @@
         }
 
         currentBubble = null;
-        currentMeta = null;
+        currentMeta   = null;
       }
       setStatus('online', 'Connected');
       document.getElementById('sendBtn').disabled = false;
-      document.getElementById('micBtn').disabled = false;
+      document.getElementById('micBtn').disabled  = false;
       scrollBottom();
     }
 
@@ -904,20 +875,14 @@
     async function toggleRecording() {
       if (isStreaming) return;
 
-      if (isRecording) {
-        mediaRecorder.stop();
-        return;
-      }
+      if (isRecording) { mediaRecorder.stop(); return; }
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         audioChunks = [];
-
         mediaRecorder = new MediaRecorder(stream, { mimeType: _bestMimeType() });
 
-        mediaRecorder.ondataavailable = e => {
-          if (e.data && e.data.size > 0) audioChunks.push(e.data);
-        };
+        mediaRecorder.ondataavailable = e => { if (e.data?.size > 0) audioChunks.push(e.data); };
 
         mediaRecorder.onstop = async () => {
           stream.getTracks().forEach(t => t.stop());
@@ -926,8 +891,7 @@
           document.getElementById('messageInput').placeholder = 'Transcribing…';
 
           const mimeType = mediaRecorder.mimeType || 'audio/webm';
-          const blob = new Blob(audioChunks, { type: mimeType });
-          await transcribeBlob(blob, mimeType);
+          await transcribeBlob(new Blob(audioChunks, { type: mimeType }), mimeType);
 
           setMicState('idle');
           document.getElementById('messageInput').placeholder = 'Type or speak your message…';
@@ -954,16 +918,16 @@
       const formData = new FormData();
       formData.append('audio', blob, 'recording' + _mimeToExt(mimeType));
       try {
-        const res = await fetch(`${API_BASE}/transcribe`, { method: 'POST', body: formData });
+        const res  = await fetch(`${API_BASE}/transcribe`, { method: 'POST', body: formData });
         const data = await res.json();
-        if (data.text && data.text.trim()) {
+        if (data.text?.trim()) {
           const input = document.getElementById('messageInput');
           input.value = data.text.trim();
           autoResize(input);
         } else {
           showError('No speech detected. Please try again.');
         }
-      } catch (err) {
+      } catch (_) {
         showError('Transcription failed. Is the backend running?');
       }
     }
@@ -978,25 +942,16 @@
       const btn = document.getElementById('micBtn');
       btn.classList.remove('recording', 'processing');
       switch (state) {
-        case 'recording':
-          btn.classList.add('recording');
-          btn.title = 'Click to stop';
-          break;
-        case 'processing':
-          btn.classList.add('processing');
-          btn.disabled = true;
-          btn.title = 'Transcribing…';
-          break;
-        default:
-          btn.disabled = isStreaming;
-          btn.title = 'Click to speak';
+        case 'recording':  btn.classList.add('recording');  btn.title = 'Click to stop';   btn.disabled = false; break;
+        case 'processing': btn.classList.add('processing'); btn.title = 'Transcribing…';   btn.disabled = true;  break;
+        default:           btn.title = 'Click to speak';   btn.disabled = isStreaming;
       }
     }
 
     // ── UI helpers ─────────────────────────────────────────────────────────
     function appendMessage(role, text) {
       const isUser = role === 'user';
-      const row = document.createElement('div');
+      const row    = document.createElement('div');
       row.className = `message ${isUser ? 'user' : 'ali'}`;
 
       const avatar = document.createElement('div');
@@ -1004,18 +959,16 @@
       avatar.textContent = isUser ? '👤' : '🏠';
 
       const wrapper = document.createElement('div');
-
-      const bubble = document.createElement('div');
+      const bubble  = document.createElement('div');
       bubble.className = 'bubble';
       bubble.textContent = text;
 
-      const meta = document.createElement('div');
+      const meta     = document.createElement('div');
       meta.className = 'message-meta';
 
       const timeSpan = document.createElement('span');
       timeSpan.textContent = formatTime();
 
-      // Speak button — closure captures the bubble element
       const speakBtn = makeSpeakButton(() => bubble.textContent);
 
       if (isUser) {
@@ -1043,24 +996,22 @@
     }
 
     function hideWelcome() {
-      const w = document.getElementById('welcome');
-      if (w) w.remove();
+      document.getElementById('welcome')?.remove();
     }
 
     function updateSidebar(state) {
       const short = id => id ? id.slice(0, 8) + '…' : '—';
       document.getElementById('sideSessionId').textContent = short(state.session_id);
-      const stageEl = document.getElementById('sideStage');
       const stage = state.stage || 'greeting';
-      stageEl.innerHTML = `<span class="stage-badge stage-${stage}">${stage.replace('_', ' ')}</span>`;
+      document.getElementById('sideStage').innerHTML =
+        `<span class="stage-badge stage-${stage}">${stage.replace('_', ' ')}</span>`;
       document.getElementById('sideCategory').textContent = state.selected_category || '—';
-      document.getElementById('sideSubtype').textContent = state.selected_subtype || '—';
-      document.getElementById('sidePrice').textContent = state.selected_price || '—';
+      document.getElementById('sideSubtype').textContent  = state.selected_subtype  || '—';
+      document.getElementById('sidePrice').textContent    = state.selected_price    || '—';
     }
 
     function setStatus(cls, text) {
-      const dot = document.getElementById('statusDot');
-      dot.className = `status-dot ${cls}`;
+      document.getElementById('statusDot').className  = `status-dot ${cls}`;
       document.getElementById('statusText').textContent = text;
     }
 
@@ -1080,7 +1031,7 @@
 
     async function newSession() {
       if (isStreaming) return;
-      if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+      if (currentAudio) { currentAudio.pause(); currentAudio = null; }
       activeSpeakBtn = null;
 
       document.getElementById('messages').innerHTML =
@@ -1096,7 +1047,7 @@
           </div>
         </div>`;
       currentBubble = null;
-      currentMeta = null;
+      currentMeta   = null;
       await createSession();
     }
 

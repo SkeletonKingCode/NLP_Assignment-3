@@ -9,6 +9,7 @@ POST   /session              — create a new session
 GET    /session/{id}         — get session state summary
 DELETE /session/{id}         — delete a session
 POST   /transcribe           — transcribe uploaded audio → {"text": "..."}
+POST   /synth                — synthesize text → WAV audio (piper TTS)
 WS     /ws/chat              — streaming chat over WebSocket
 
 WebSocket protocol
@@ -38,7 +39,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -81,7 +82,6 @@ from Voice import asr, tts                # noqa: E402
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Ali Real Estate API starting up — preloading voice models…")
-    # Preload both models in a thread so the event loop stays unblocked.
     loop = asyncio.get_event_loop()
     await loop.run_in_executor(None, asr.preload)
     await loop.run_in_executor(None, tts.preload)
@@ -132,6 +132,10 @@ class SessionResponse(BaseModel):
     message: str
 
 
+class SynthRequest(BaseModel):
+    text: str
+
+
 @app.post("/session", response_model=SessionResponse, status_code=201)
 async def create_new_session():
     sid = create_session()
@@ -166,21 +170,43 @@ async def health_check():
 
 
 # ---------------------------------------------------------------------------
+# TTS synthesis endpoint  (POST /synth)
+# ---------------------------------------------------------------------------
+
+@app.post("/synth")
+async def synthesize_speech(req: SynthRequest):
+    """Synthesize text to WAV audio using piper TTS.
+
+    Returns
+    -------
+    audio/wav binary response, or 503 if piper is unavailable.
+    """
+    if not tts.is_available():
+        raise HTTPException(
+            status_code=503,
+            detail="TTS unavailable. Ensure piper is installed and the voice model is present.",
+        )
+    text = req.text.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="text must not be empty.")
+
+    loop = asyncio.get_event_loop()
+    try:
+        wav_bytes = await loop.run_in_executor(None, tts.synthesize, text)
+    except Exception as exc:
+        logger.error("TTS synthesis error: %s", exc)
+        raise HTTPException(status_code=500, detail=f"TTS synthesis failed: {exc}")
+
+    return Response(content=wav_bytes, media_type="audio/wav")
+
+
+# ---------------------------------------------------------------------------
 # Transcription endpoint  (POST /transcribe)
 # ---------------------------------------------------------------------------
 
 @app.post("/transcribe")
 async def transcribe_audio(audio: UploadFile = File(...)):
-    """Accept an audio file upload and return the transcribed text.
-
-    The browser sends a WebM/Opus blob from MediaRecorder.
-    faster-whisper handles the format via ffmpeg automatically.
-
-    Returns
-    -------
-    {"text": "<transcribed string>"}
-    """
-    # Write the upload to a temporary file so faster-whisper can read it
+    """Accept an audio file upload and return the transcribed text."""
     suffix = Path(audio.filename or "recording.webm").suffix or ".webm"
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
         contents = await audio.read()
@@ -202,20 +228,6 @@ async def transcribe_audio(audio: UploadFile = File(...)):
 
 @app.websocket("/ws/chat")
 async def websocket_chat(websocket: WebSocket):
-    """Real-time streaming chat with optional sentence-level TTS audio.
-
-    Client payload
-    --------------
-    {
-        "session_id": "<uuid>",
-        "message":    "<user text>",
-        "voice":      true          ← optional, default false
-    }
-
-    When voice=true the server streams audio_chunk frames (base64 WAV)
-    sentence-by-sentence interleaved with token frames so the browser can
-    start playing before the LLM has finished generating.
-    """
     await websocket.accept()
     _active_connections.add(websocket)
     loop = asyncio.get_event_loop()
@@ -233,8 +245,8 @@ async def websocket_chat(websocket: WebSocket):
                 await _send(websocket, "error", "Invalid JSON payload.")
                 continue
 
-            session_id:   str  = payload.get("session_id", "")
-            user_message: str  = payload.get("message", "").strip()
+            session_id:    str  = payload.get("session_id", "")
+            user_message:  str  = payload.get("message", "").strip()
             voice_enabled: bool = bool(payload.get("voice", False))
 
             if not session_id or get_session(session_id) is None:
@@ -245,8 +257,7 @@ async def websocket_chat(websocket: WebSocket):
                 await _send(websocket, "error", "Empty message received.")
                 continue
 
-            # ── Stream LLM tokens + optional TTS ──────────────────────────
-            sentence_buf = ""      # accumulates tokens until a sentence ends
+            sentence_buf = ""
 
             try:
                 async for token in stream_response(session_id, user_message):
@@ -254,16 +265,13 @@ async def websocket_chat(websocket: WebSocket):
                         await _send(websocket, "error", token)
                         break
 
-                    # Always send the text token first so UI updates instantly
                     await _send(websocket, "token", token)
 
                     if voice_enabled and tts.is_available():
                         sentence_buf += token
-                        # Flush when we hit a sentence-ending punctuation mark.
-                        # We wait for trailing whitespace so "Dr." doesn't trigger.
                         stripped = sentence_buf.rstrip()
                         if stripped and stripped[-1] in ".!?" and (
-                            sentence_buf != stripped         # trailing space exists
+                            sentence_buf != stripped
                             or sentence_buf.endswith("\n")
                         ):
                             to_speak = stripped
@@ -279,7 +287,6 @@ async def websocket_chat(websocket: WebSocket):
                 await _send(websocket, "error", f"Streaming error: {exc}")
                 continue
 
-            # Flush any remaining text that didn't end with punctuation
             if voice_enabled and tts.is_available() and sentence_buf.strip():
                 try:
                     audio_bytes = await loop.run_in_executor(
