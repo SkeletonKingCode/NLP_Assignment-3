@@ -10,7 +10,6 @@
     href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap"
     rel="stylesheet" />
   <style>
-    /* ── Reset & Variables ──────────────────────────────────────────────── */
     *,
     *::before,
     *::after {
@@ -49,7 +48,6 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ── Layout ─────────────────────────────────────────────────────────── */
     .app {
       display: grid;
       grid-template-columns: 260px 1fr;
@@ -57,7 +55,6 @@
       height: 100vh;
     }
 
-    /* ── Sidebar ─────────────────────────────────────────────────────────── */
     .sidebar {
       background: var(--surface);
       border-right: 1px solid var(--border);
@@ -210,7 +207,6 @@
       margin-bottom: 4px;
     }
 
-    /* ── Main chat area ───────────────────────────────────────────────────── */
     .chat-area {
       display: flex;
       flex-direction: column;
@@ -218,7 +214,6 @@
       overflow: hidden;
     }
 
-    /* ── Header ─────────────────────────────────────────────────────────── */
     .chat-header {
       display: flex;
       align-items: center;
@@ -257,79 +252,12 @@
       transition: background 0.3s;
     }
 
-    .status-dot.online {
-      background: var(--emerald);
-    }
-
+    .status-dot.online { background: var(--emerald); }
     .status-dot.typing {
       background: var(--gold);
       animation: pulse 1s infinite;
     }
 
-    /* ── Speaker toggle button ─────────────────────────────────────────── */
-    .speaker-btn {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      background: transparent;
-      border: 1px solid var(--border);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      transition: background 0.15s, border-color 0.15s;
-      flex-shrink: 0;
-      line-height: 1;
-    }
-
-    .speaker-btn:hover {
-      background: var(--surface2);
-    }
-
-    .speaker-btn.active {
-      background: rgba(16, 185, 129, .15);
-      border-color: var(--emerald);
-    }
-
-    /* ── TTS speaking indicator ────────────────────────────────────────── */
-    .speaking-badge {
-      display: none;
-      align-items: center;
-      gap: 5px;
-      font-size: 11px;
-      color: var(--emerald);
-      padding: 2px 8px;
-      border: 1px solid var(--emerald-dim);
-      border-radius: 999px;
-      background: rgba(16, 185, 129, .08);
-    }
-
-    .speaking-badge.visible {
-      display: flex;
-    }
-
-    .speaking-dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--emerald);
-      animation: pulse 0.7s infinite;
-    }
-
-    @keyframes pulse {
-
-      0%,
-      100% {
-        opacity: 1;
-      }
-
-      50% {
-        opacity: 0.3;
-      }
-    }
-
-    /* ── Messages ────────────────────────────────────────────────────────── */
     .messages {
       flex: 1;
       overflow-y: auto;
@@ -340,14 +268,8 @@
       scroll-behavior: smooth;
     }
 
-    .messages::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .messages::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
+    .messages::-webkit-scrollbar { width: 6px; }
+    .messages::-webkit-scrollbar-track { background: transparent; }
     .messages::-webkit-scrollbar-thumb {
       background: var(--border);
       border-radius: 3px;
@@ -365,10 +287,7 @@
       animation: fadeIn 0.5s ease;
     }
 
-    .welcome-icon {
-      font-size: 52px;
-      filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.4));
-    }
+    .welcome-icon { font-size: 52px; filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.4)); }
 
     .welcome h2 {
       font-family: var(--font-head);
@@ -379,11 +298,7 @@
       -webkit-text-fill-color: transparent;
     }
 
-    .welcome p {
-      color: var(--text-muted);
-      max-width: 400px;
-      font-size: 14px;
-    }
+    .welcome p { color: var(--text-muted); max-width: 400px; font-size: 14px; }
 
     .quick-prompts {
       display: flex;
@@ -420,35 +335,22 @@
     }
 
     @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-
-      to {
-        opacity: 1;
-      }
+      from { opacity: 0; }
+      to   { opacity: 1; }
     }
 
-    .message.user {
-      flex-direction: row-reverse;
-      align-self: flex-end;
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
     }
 
-    .message.ali {
-      align-self: flex-start;
-    }
+    .message.user { flex-direction: row-reverse; align-self: flex-end; }
+    .message.ali  { align-self: flex-start; }
 
     .avatar {
       width: 32px;
@@ -462,14 +364,8 @@
       margin-top: 2px;
     }
 
-    .avatar.ali-av {
-      background: linear-gradient(135deg, var(--emerald), #059669);
-    }
-
-    .avatar.user-av {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-    }
+    .avatar.ali-av  { background: linear-gradient(135deg, var(--emerald), #059669); }
+    .avatar.user-av { background: var(--surface2); border: 1px solid var(--border); }
 
     .bubble {
       padding: 12px 16px;
@@ -501,21 +397,40 @@
       margin-left: 1px;
     }
 
-    @keyframes blink {
-      50% {
-        opacity: 0;
-      }
-    }
+    @keyframes blink { 50% { opacity: 0; } }
 
+    /* ── message meta row (time + speak button) ── */
     .message-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
       font-size: 11px;
       color: var(--text-muted);
       margin-top: 4px;
       padding: 0 4px;
     }
 
-    .message.user .message-meta {
-      text-align: right;
+    .message.user .message-meta { justify-content: flex-end; }
+
+    /* ── per-message speaker button ── */
+    .speak-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 13px;
+      padding: 1px 4px;
+      border-radius: 4px;
+      line-height: 1;
+      transition: color 0.15s, background 0.15s;
+      flex-shrink: 0;
+    }
+
+    .speak-btn:hover { color: var(--emerald); background: rgba(16,185,129,0.08); }
+
+    .speak-btn.speaking {
+      color: var(--emerald);
+      animation: pulse 0.8s infinite;
     }
 
     .error-bubble {
@@ -529,7 +444,6 @@
       max-width: 500px;
     }
 
-    /* ── Input area ──────────────────────────────────────────────────────── */
     .input-area {
       padding: 16px 24px 20px;
       border-top: 1px solid var(--border);
@@ -548,9 +462,7 @@
       transition: border-color 0.15s;
     }
 
-    .input-wrap:focus-within {
-      border-color: var(--emerald);
-    }
+    .input-wrap:focus-within { border-color: var(--emerald); }
 
     #messageInput {
       flex: 1;
@@ -566,11 +478,8 @@
       line-height: 1.5;
     }
 
-    #messageInput::placeholder {
-      color: var(--text-muted);
-    }
+    #messageInput::placeholder { color: var(--text-muted); }
 
-    /* ── Mic button ────────────────────────────────────────────────────── */
     #micBtn {
       width: 34px;
       height: 34px;
@@ -584,18 +493,11 @@
       flex-shrink: 0;
       font-size: 16px;
       line-height: 1;
-      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+      transition: background 0.15s, border-color 0.15s;
     }
 
-    #micBtn:hover:not(:disabled) {
-      background: var(--surface);
-      border-color: var(--gold);
-    }
-
-    #micBtn:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-    }
+    #micBtn:hover:not(:disabled) { background: var(--surface); border-color: var(--gold); }
+    #micBtn:disabled { opacity: 0.35; cursor: not-allowed; }
 
     #micBtn.recording {
       background: rgba(239, 68, 68, 0.15);
@@ -609,18 +511,10 @@
     }
 
     @keyframes micPulse {
-
-      0%,
-      100% {
-        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
-      }
-
-      50% {
-        box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
-      }
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      50%       { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
     }
 
-    /* ── Send button ─────────────────────────────────────────────────── */
     #sendBtn {
       width: 34px;
       height: 34px;
@@ -635,22 +529,10 @@
       transition: background 0.15s, transform 0.1s;
     }
 
-    #sendBtn:hover:not(:disabled) {
-      background: #059669;
-    }
-
-    #sendBtn:active:not(:disabled) {
-      transform: scale(0.95);
-    }
-
-    #sendBtn:disabled {
-      background: var(--border);
-      cursor: not-allowed;
-    }
-
-    #sendBtn svg {
-      color: white;
-    }
+    #sendBtn:hover:not(:disabled) { background: #059669; }
+    #sendBtn:active:not(:disabled) { transform: scale(0.95); }
+    #sendBtn:disabled { background: var(--border); cursor: not-allowed; }
+    #sendBtn svg { color: white; }
 
     .input-hint {
       font-size: 11px;
@@ -659,7 +541,6 @@
       text-align: center;
     }
 
-    /* ── Connection banner ───────────────────────────────────────────────── */
     .conn-banner {
       display: none;
       position: fixed;
@@ -675,19 +556,11 @@
       z-index: 100;
     }
 
-    .conn-banner.visible {
-      display: block;
-    }
+    .conn-banner.visible { display: block; }
 
-    /* ── Responsive ──────────────────────────────────────────────────────── */
     @media (max-width: 700px) {
-      .app {
-        grid-template-columns: 1fr;
-      }
-
-      .sidebar {
-        display: none;
-      }
+      .app { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
     }
   </style>
 </head>
@@ -698,7 +571,6 @@
 
   <div class="app">
 
-    <!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-icon">🏠</div>
@@ -746,21 +618,11 @@
       </div>
     </aside>
 
-    <!-- ── Chat area ───────────────────────────────────────────────────────── -->
     <main class="chat-area">
 
       <header class="chat-header">
         <div class="header-title">Ali Real Estate Assistant</div>
         <div class="header-right">
-          <!-- Speaking badge (visible while TTS audio plays) -->
-          <div class="speaking-badge" id="speakingBadge">
-            <div class="speaking-dot"></div>
-            Speaking
-          </div>
-          <!-- Speaker toggle -->
-          <button class="speaker-btn active" id="speakerBtn" title="Toggle voice output"
-            onclick="toggleTTS()">🔊</button>
-          <!-- Connection status -->
           <div class="header-status">
             <div class="status-dot" id="statusDot"></div>
             <span id="statusText">Connecting…</span>
@@ -786,9 +648,7 @@
         <div class="input-wrap">
           <textarea id="messageInput" placeholder="Type or speak your message…" rows="1" onkeydown="handleKey(event)"
             oninput="autoResize(this)"></textarea>
-          <!-- Mic button (NEW) -->
-          <button id="micBtn" onclick="toggleRecording()" title="Hold to speak" disabled>🎙️</button>
-          <!-- Send button -->
+          <button id="micBtn" onclick="toggleRecording()" title="Click to speak" disabled>🎙️</button>
           <button id="sendBtn" onclick="sendMessage()" disabled title="Send">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
               stroke-linecap="round" stroke-linejoin="round">
@@ -797,20 +657,18 @@
             </svg>
           </button>
         </div>
-        <p class="input-hint">Enter to send · Shift+Enter for new line · 🎙️ to speak · 🔊 for voice output</p>
+        <p class="input-hint">Enter to send · Shift+Enter for new line · 🎙️ to speak · 🔊 on any message to play it</p>
       </div>
 
     </main>
   </div>
 
   <script>
-    // ── Config ─────────────────────────────────────────────────────────────────
     const API_BASE = window.location.hostname === 'localhost'
       ? 'http://localhost:8000'
       : `${window.location.protocol}//${window.location.host}`;
     const WS_BASE = API_BASE.replace(/^http/, 'ws');
 
-    // ── State ──────────────────────────────────────────────────────────────────
     let ws = null;
     let sessionId = null;
     let isStreaming = false;
@@ -818,17 +676,68 @@
     let currentMeta = null;
     let reconnectTimer = null;
 
-    // ── Voice input state ──────────────────────────────────────────────────────
+    // mic state
     let mediaRecorder = null;
     let audioChunks = [];
     let isRecording = false;
 
-    // ── TTS / audio queue state ────────────────────────────────────────────────
-    let ttsEnabled = true;    // ON by default
-    let audioQueue = [];      // array of ObjectURLs waiting to play
-    let isSpeaking = false;   // true while any audio chunk is playing
+    // ── TTS via Web Speech API ─────────────────────────────────────────────
+    // Tracks the currently active speak button so we can reset its style
+    let activeSpeakBtn = null;
 
-    // ── Init ───────────────────────────────────────────────────────────────────
+    function speakText(text, btn) {
+      // If something is already playing, cancel it first
+      if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+        window.speechSynthesis.cancel();
+        // Reset previous button immediately
+        if (activeSpeakBtn) {
+          activeSpeakBtn.textContent = '🔊';
+          activeSpeakBtn.classList.remove('speaking');
+          activeSpeakBtn.title = 'Play';
+        }
+        // If we clicked the same button, just stop — don't restart
+        if (activeSpeakBtn === btn) {
+          activeSpeakBtn = null;
+          return;
+        }
+      }
+
+      activeSpeakBtn = btn;
+      btn.textContent = '⏹';
+      btn.classList.add('speaking');
+      btn.title = 'Stop';
+
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.lang = 'en-US';
+      utt.rate = 1.0;
+
+      utt.onend = () => {
+        btn.textContent = '🔊';
+        btn.classList.remove('speaking');
+        btn.title = 'Play';
+        if (activeSpeakBtn === btn) activeSpeakBtn = null;
+      };
+
+      utt.onerror = () => {
+        btn.textContent = '🔊';
+        btn.classList.remove('speaking');
+        btn.title = 'Play';
+        if (activeSpeakBtn === btn) activeSpeakBtn = null;
+      };
+
+      window.speechSynthesis.speak(utt);
+    }
+
+    function makeSpeakButton(getText) {
+      const btn = document.createElement('button');
+      btn.className = 'speak-btn';
+      btn.textContent = '🔊';
+      btn.title = 'Play';
+      btn.onclick = () => speakText(getText(), btn);
+      return btn;
+    }
+
+    // ── Init ───────────────────────────────────────────────────────────────
     async function init() {
       await createSession();
       connectWS();
@@ -845,7 +754,7 @@
       }
     }
 
-    // ── WebSocket ──────────────────────────────────────────────────────────────
+    // ── WebSocket ──────────────────────────────────────────────────────────
     function connectWS() {
       if (ws) ws.close();
       ws = new WebSocket(`${WS_BASE}/ws/chat`);
@@ -879,9 +788,6 @@
         case 'token':
           appendToken(frame.data);
           break;
-        case 'audio_chunk':          // NEW — enqueue audio for sequential playback
-          enqueueAudioChunk(frame.data);
-          break;
         case 'done':
           finishStreaming();
           break;
@@ -896,10 +802,11 @@
           finishStreaming();
           showError(frame.data);
           break;
+        // audio_chunk frames ignored — we use Web Speech API instead
       }
     }
 
-    // ── Sending ────────────────────────────────────────────────────────────────
+    // ── Sending ────────────────────────────────────────────────────────────
     function sendMessage() {
       const input = document.getElementById('messageInput');
       const text = input.value.trim();
@@ -911,8 +818,8 @@
       autoResize(input);
 
       beginStreaming();
-      // Include voice flag so the backend knows whether to send audio_chunk frames
-      ws.send(JSON.stringify({ session_id: sessionId, message: text, voice: ttsEnabled }));
+      // voice: false — we don't need audio_chunk frames, using Web Speech API
+      ws.send(JSON.stringify({ session_id: sessionId, message: text, voice: false }));
     }
 
     function sendQuick(text) {
@@ -927,7 +834,7 @@
       }
     }
 
-    // ── Streaming helpers ──────────────────────────────────────────────────────
+    // ── Streaming ──────────────────────────────────────────────────────────
     function beginStreaming() {
       isStreaming = true;
       setStatus('typing', 'Ali is typing…');
@@ -942,8 +849,10 @@
       avatar.textContent = '🏠';
 
       const wrapper = document.createElement('div');
+
       const bubble = document.createElement('div');
       bubble.className = 'bubble streaming';
+
       const meta = document.createElement('div');
       meta.className = 'message-meta';
 
@@ -968,7 +877,20 @@
       isStreaming = false;
       if (currentBubble) {
         currentBubble.classList.remove('streaming');
-        if (currentMeta) currentMeta.textContent = formatTime();
+
+        // Capture text now for the speak button closure
+        const bubble = currentBubble;
+
+        if (currentMeta) {
+          const timeSpan = document.createElement('span');
+          timeSpan.textContent = formatTime();
+
+          const speakBtn = makeSpeakButton(() => bubble.textContent);
+
+          currentMeta.appendChild(timeSpan);
+          currentMeta.appendChild(speakBtn);
+        }
+
         currentBubble = null;
         currentMeta = null;
       }
@@ -978,87 +900,15 @@
       scrollBottom();
     }
 
-    // ── TTS audio queue (NEW) ──────────────────────────────────────────────────
-
-    /**
-     * Decode a base64 WAV string, create an object URL, and push onto the queue.
-     * If nothing is playing yet, kick off playback immediately.
-     */
-    function enqueueAudioChunk(b64wav) {
-      if (!ttsEnabled) return;
-
-      // Decode base64 → Uint8Array → Blob → ObjectURL
-      const binary = atob(b64wav);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-      const blob = new Blob([bytes], { type: 'audio/wav' });
-      const url = URL.createObjectURL(blob);
-
-      audioQueue.push(url);
-      if (!isSpeaking) playNextChunk();
-    }
-
-    /** Play the next URL in the queue (if any). */
-    function playNextChunk() {
-      if (!audioQueue.length) {
-        isSpeaking = false;
-        document.getElementById('speakingBadge').classList.remove('visible');
-        return;
-      }
-
-      isSpeaking = true;
-      document.getElementById('speakingBadge').classList.add('visible');
-
-      const url = audioQueue.shift();
-      const audio = new Audio(url);
-
-      audio.onended = () => {
-        URL.revokeObjectURL(url);
-        playNextChunk();
-      };
-      audio.onerror = () => {
-        URL.revokeObjectURL(url);
-        playNextChunk();
-      };
-
-      audio.play().catch((err) => {
-        console.error('Audio playback blocked or failed:', err);
-        // Autoplay blocked — browser requires a user gesture first.
-        URL.revokeObjectURL(url);
-        playNextChunk();
-      });
-    }
-
-    /** Stop any playing audio and drain the queue. */
-    function clearAudioQueue() {
-      audioQueue.forEach(url => URL.revokeObjectURL(url));
-      audioQueue = [];
-      isSpeaking = false;
-      document.getElementById('speakingBadge').classList.remove('visible');
-    }
-
-    // ── Speaker toggle (NEW) ───────────────────────────────────────────────────
-    function toggleTTS() {
-      ttsEnabled = !ttsEnabled;
-      const btn = document.getElementById('speakerBtn');
-      btn.textContent = ttsEnabled ? '🔊' : '🔇';
-      btn.classList.toggle('active', ttsEnabled);
-      if (!ttsEnabled) clearAudioQueue();
-    }
-
-    // ── Microphone / ASR (NEW) ─────────────────────────────────────────────────
-
-    /** Toggle recording on/off. */
+    // ── Mic / ASR ──────────────────────────────────────────────────────────
     async function toggleRecording() {
       if (isStreaming) return;
 
       if (isRecording) {
-        // Second click — stop and transcribe
         mediaRecorder.stop();
         return;
       }
 
-      // First click — request mic and start recording
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         audioChunks = [];
@@ -1070,26 +920,23 @@
         };
 
         mediaRecorder.onstop = async () => {
-          // Release mic immediately
           stream.getTracks().forEach(t => t.stop());
           isRecording = false;
-
           setMicState('processing');
-          const inputBase = document.getElementById('messageInput');
-          inputBase.placeholder = "Transcribing audio...";
+          document.getElementById('messageInput').placeholder = 'Transcribing…';
 
           const mimeType = mediaRecorder.mimeType || 'audio/webm';
           const blob = new Blob(audioChunks, { type: mimeType });
           await transcribeBlob(blob, mimeType);
 
           setMicState('idle');
-          inputBase.placeholder = "Type or speak your message…";
+          document.getElementById('messageInput').placeholder = 'Type or speak your message…';
         };
 
         mediaRecorder.start();
         isRecording = true;
         setMicState('recording');
-        document.getElementById('messageInput').placeholder = "Listening... (speak now)";
+        document.getElementById('messageInput').placeholder = 'Listening… (click 🎙️ again to stop)';
 
       } catch (err) {
         console.error('Microphone error:', err);
@@ -1098,39 +945,25 @@
       }
     }
 
-    /** Choose the best supported audio MIME type for MediaRecorder. */
     function _bestMimeType() {
-      const candidates = [
-        'audio/webm;codecs=opus',
-        'audio/webm',
-        'audio/ogg;codecs=opus',
-        'audio/mp4',
-      ];
+      const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4'];
       return candidates.find(t => MediaRecorder.isTypeSupported(t)) || '';
     }
 
-    /**
-     * POST the audio blob to /transcribe, then auto-fill the input
-     * and send the message on success.
-     */
     async function transcribeBlob(blob, mimeType) {
       const formData = new FormData();
       formData.append('audio', blob, 'recording' + _mimeToExt(mimeType));
-
       try {
         const res = await fetch(`${API_BASE}/transcribe`, { method: 'POST', body: formData });
         const data = await res.json();
-
         if (data.text && data.text.trim()) {
           const input = document.getElementById('messageInput');
           input.value = data.text.trim();
           autoResize(input);
-          // Do not auto-send. Wait for user to press Enter.
         } else {
           showError('No speech detected. Please try again.');
         }
       } catch (err) {
-        console.error('Transcription error:', err);
         showError('Transcription failed. Is the backend running?');
       }
     }
@@ -1141,28 +974,26 @@
       return '.webm';
     }
 
-    /** Update mic button appearance based on state. */
     function setMicState(state) {
       const btn = document.getElementById('micBtn');
       btn.classList.remove('recording', 'processing');
-
       switch (state) {
         case 'recording':
           btn.classList.add('recording');
-          btn.title = 'Click to stop recording';
+          btn.title = 'Click to stop';
           break;
         case 'processing':
           btn.classList.add('processing');
           btn.disabled = true;
           btn.title = 'Transcribing…';
           break;
-        default: // idle
+        default:
           btn.disabled = isStreaming;
           btn.title = 'Click to speak';
       }
     }
 
-    // ── UI helpers ─────────────────────────────────────────────────────────────
+    // ── UI helpers ─────────────────────────────────────────────────────────
     function appendMessage(role, text) {
       const isUser = role === 'user';
       const row = document.createElement('div');
@@ -1173,14 +1004,27 @@
       avatar.textContent = isUser ? '👤' : '🏠';
 
       const wrapper = document.createElement('div');
+
       const bubble = document.createElement('div');
       bubble.className = 'bubble';
       bubble.textContent = text;
 
       const meta = document.createElement('div');
       meta.className = 'message-meta';
-      meta.textContent = formatTime();
-      if (isUser) meta.style.textAlign = 'right';
+
+      const timeSpan = document.createElement('span');
+      timeSpan.textContent = formatTime();
+
+      // Speak button — closure captures the bubble element
+      const speakBtn = makeSpeakButton(() => bubble.textContent);
+
+      if (isUser) {
+        meta.appendChild(speakBtn);
+        meta.appendChild(timeSpan);
+      } else {
+        meta.appendChild(timeSpan);
+        meta.appendChild(speakBtn);
+      }
 
       wrapper.appendChild(bubble);
       wrapper.appendChild(meta);
@@ -1234,28 +1078,28 @@
       return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
-    // ── New session ────────────────────────────────────────────────────────────
     async function newSession() {
       if (isStreaming) return;
-      clearAudioQueue();
+      if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+      activeSpeakBtn = null;
+
       document.getElementById('messages').innerHTML =
         `<div class="welcome" id="welcome">
-        <div class="welcome-icon">🏡</div>
-        <h2>Welcome to Ali</h2>
-        <p>Your personal real estate guide for Pakistan.</p>
-        <div class="quick-prompts">
-          <button class="quick-btn" onclick="sendQuick('Hi, I\\'m looking for a property')">Browse properties</button>
-          <button class="quick-btn" onclick="sendQuick('I want to buy a house')">Buy a house</button>
-          <button class="quick-btn" onclick="sendQuick('Show me apartments')">Apartments</button>
-          <button class="quick-btn" onclick="sendQuick('I need a shop')">Shops</button>
-        </div>
-      </div>`;
+          <div class="welcome-icon">🏡</div>
+          <h2>Welcome to Ali</h2>
+          <p>Your personal real estate guide for Pakistan.</p>
+          <div class="quick-prompts">
+            <button class="quick-btn" onclick="sendQuick('Hi, I\\'m looking for a property')">Browse properties</button>
+            <button class="quick-btn" onclick="sendQuick('I want to buy a house')">Buy a house</button>
+            <button class="quick-btn" onclick="sendQuick('Show me apartments')">Apartments</button>
+            <button class="quick-btn" onclick="sendQuick('I need a shop')">Shops</button>
+          </div>
+        </div>`;
       currentBubble = null;
       currentMeta = null;
       await createSession();
     }
 
-    // ── Start ──────────────────────────────────────────────────────────────────
     init();
   </script>
 </body>
