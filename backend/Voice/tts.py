@@ -88,7 +88,64 @@ def _create_wav_header(sample_rate: int, bits_per_sample: int, channels: int, da
     
     return header
 
+# backend/Voice/tts.py - Modified to return raw PCM
 
+def synthesize_raw(text: str) -> bytes:
+    """Return raw PCM audio bytes (16-bit mono)."""
+    if not is_available():
+        raise RuntimeError("Piper TTS not available")
+    
+    with tempfile.NamedTemporaryFile(suffix='.raw', delete=False) as tmp:
+        raw_path = tmp.name
+    
+    try:
+        cmd = [
+            PIPER_EXECUTABLE,
+            "--model", PIPER_MODEL_PATH,
+            "--output_file", raw_path,
+            "--output-raw",
+        ]
+        
+        process = subprocess.Popen(
+            cmd,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        
+        process.communicate(input=text, timeout=15)
+        
+        if process.returncode != 0:
+            raise RuntimeError("Piper failed")
+        
+        with open(raw_path, 'rb') as f:
+            return f.read()
+            
+    finally:
+        if os.path.exists(raw_path):
+            os.unlink(raw_path)
+
+
+def get_audio_config() -> dict:
+    """Return audio configuration for the client."""
+    sample_rate = 22050  # Default
+    model_json = PIPER_MODEL_PATH + '.json'
+    if os.path.exists(model_json):
+        try:
+            import json
+            with open(model_json, 'r') as f:
+                config = json.load(f)
+                sample_rate = config.get('audio', {}).get('sample_rate', 22050)
+        except:
+            pass
+    
+    return {
+        "sample_rate": sample_rate,
+        "channels": 1,
+        "bit_depth": 16
+    }
+    
 def synthesize(text: str) -> bytes:
     """Convert text to WAV audio bytes using piper subprocess.
     

@@ -219,7 +219,6 @@
     .status-dot.online { background: var(--emerald); }
     .status-dot.typing { background: var(--gold); animation: pulse 1s infinite; }
 
-    /* tts-unavailable banner in header */
     .tts-badge {
       font-size: 11px;
       padding: 2px 8px;
@@ -344,7 +343,6 @@
 
     @keyframes blink { 50% { opacity: 0; } }
 
-    /* ── message meta row ── */
     .message-meta {
       display: flex;
       align-items: center;
@@ -357,7 +355,6 @@
 
     .message.user .message-meta { justify-content: flex-end; }
 
-    /* ── per-message speaker button ── */
     .speak-btn {
       background: none;
       border: none;
@@ -585,28 +582,30 @@
       : `${window.location.protocol}//${window.location.host}`;
     const WS_BASE = API_BASE.replace(/^http/, 'ws');
 
-    let ws            = null;
-    let sessionId     = null;
-    let isStreaming   = false;
+    let ws = null;
+    let sessionId = null;
+    let isStreaming = false;
     let currentBubble = null;
-    let currentMeta   = null;
+    let currentMeta = null;
     let reconnectTimer = null;
 
-    // mic state
+    // Audio context for streaming TTS
+    let audioContext = null;
+    let currentSource = null;
+    let currentAudio = null;
+    let activeSpeakBtn = null;
+
+    // Mic state
     let mediaRecorder = null;
-    let audioChunks   = [];
-    let isRecording   = false;
+    let audioChunks = [];
+    let isRecording = false;
 
-    // TTS state — only one clip plays at a time
-    let currentAudio    = null;   // the active HTMLAudioElement
-    let activeSpeakBtn  = null;   // the button that triggered it
-
-    // ── Check piper availability on load ──────────────────────────────────
+    // TTS availability
     let ttsAvailable = false;
 
     async function checkTTS() {
       try {
-        const res  = await fetch(`${API_BASE}/health`);
+        const res = await fetch(`${API_BASE}/health`);
         const data = await res.json();
         ttsAvailable = !!data.tts_available;
         if (!ttsAvailable) {
@@ -617,102 +616,95 @@
       }
     }
 
-    // ── Piper TTS playback ─────────────────────────────────────────────────
+    async function initAudioContext() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+      }
+      return audioContext;
+    }
 
-    /**
-     * POST text to /synth, get WAV back, play it.
-     * btn is the 🔊 button that was clicked.
-     */
     async function speakText(text, btn) {
-      // Stop whatever is currently playing
+      if (!ttsAvailable) {
+        console.warn('TTS not available');
+        return;
+      }
+
+      // Stop current playback
+      if (currentSource) {
+        try {
+          currentSource.stop();
+        } catch (e) { }
+        currentSource = null;
+      }
       if (currentAudio) {
         currentAudio.pause();
         currentAudio = null;
-        if (activeSpeakBtn) {
-          activeSpeakBtn.textContent = '🔊';
-          activeSpeakBtn.classList.remove('speaking', 'loading');
-          activeSpeakBtn.title = 'Play';
-        }
-        // If the same button was clicked again, just stop
-        if (activeSpeakBtn === btn) {
-          activeSpeakBtn = null;
-          return;
-        }
+      }
+
+      if (activeSpeakBtn && activeSpeakBtn !== btn) {
+        activeSpeakBtn.textContent = '🔊';
+        activeSpeakBtn.classList.remove('speaking', 'loading');
       }
 
       activeSpeakBtn = btn;
       btn.textContent = '⏳';
       btn.classList.add('loading');
-      btn.title = 'Loading…';
+      btn.disabled = true;
 
-      let wavUrl = null;
       try {
-        const res = await fetch(`${API_BASE}/synth`, {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ text }),
-        });
-
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(err.detail || `HTTP ${res.status}`);
+        const response = await fetch(`${API_BASE}/synth-stream?text=${encodeURIComponent(text)}`);
+        
+        if (!response.ok) {
+          throw new Error(`TTS failed: ${response.status}`);
         }
 
-        const blob = await res.blob();
-        wavUrl = URL.createObjectURL(blob);
-
+        const sampleRate = parseInt(response.headers.get('X-Sample-Rate')) || 22050;
+        const arrayBuffer = await response.arrayBuffer();
+        
+        const audioCtx = await initAudioContext();
+        
+        // Convert 16-bit PCM to Float32
+        const int16Array = new Int16Array(arrayBuffer);
+        const float32Array = new Float32Array(int16Array.length);
+        for (let i = 0; i < int16Array.length; i++) {
+          float32Array[i] = int16Array[i] / 32768.0;
+        }
+        
+        const audioBuffer = audioCtx.createBuffer(1, float32Array.length, sampleRate);
+        audioBuffer.copyToChannel(float32Array, 0);
+        
+        currentSource = audioCtx.createBufferSource();
+        currentSource.buffer = audioBuffer;
+        currentSource.connect(audioCtx.destination);
+        currentSource.start();
+        
+        btn.textContent = '⏹';
+        btn.classList.remove('loading');
+        btn.classList.add('speaking');
+        btn.disabled = false;
+        
+        currentSource.onended = () => {
+          btn.textContent = '🔊';
+          btn.classList.remove('speaking');
+          if (activeSpeakBtn === btn) {
+            currentSource = null;
+            activeSpeakBtn = null;
+          }
+        };
+        
       } catch (err) {
         console.error('TTS error:', err);
         btn.textContent = '🔊';
         btn.classList.remove('loading');
-        btn.title = 'Play (failed)';
+        btn.disabled = false;
         activeSpeakBtn = null;
-        return;
+        showError('TTS failed: ' + err.message);
       }
-
-      // Playback
-      btn.textContent = '⏹';
-      btn.classList.remove('loading');
-      btn.classList.add('speaking');
-      btn.title = 'Stop';
-
-      const audio = new Audio(wavUrl);
-      currentAudio = audio;
-
-      audio.onended = () => {
-        URL.revokeObjectURL(wavUrl);
-        btn.textContent = '🔊';
-        btn.classList.remove('speaking');
-        btn.title = 'Play';
-        if (activeSpeakBtn === btn) {
-          currentAudio   = null;
-          activeSpeakBtn = null;
-        }
-      };
-
-      audio.onerror = () => {
-        URL.revokeObjectURL(wavUrl);
-        btn.textContent = '🔊';
-        btn.classList.remove('speaking');
-        btn.title = 'Play';
-        if (activeSpeakBtn === btn) {
-          currentAudio   = null;
-          activeSpeakBtn = null;
-        }
-      };
-
-      audio.play().catch((err) => {
-        console.error('Audio play blocked:', err);
-        URL.revokeObjectURL(wavUrl);
-        btn.textContent = '🔊';
-        btn.classList.remove('speaking');
-        btn.title = 'Play';
-        currentAudio   = null;
-        activeSpeakBtn = null;
-      });
     }
 
-    /** Build a 🔊 speak button for a message. getText() is called on click. */
     function makeSpeakButton(getText) {
       const btn = document.createElement('button');
       btn.className = 'speak-btn';
@@ -723,7 +715,6 @@
       return btn;
     }
 
-    // ── Init ───────────────────────────────────────────────────────────────
     async function init() {
       await checkTTS();
       await createSession();
@@ -732,16 +723,15 @@
 
     async function createSession() {
       try {
-        const res  = await fetch(`${API_BASE}/session`, { method: 'POST' });
+        const res = await fetch(`${API_BASE}/session`, { method: 'POST' });
         const data = await res.json();
-        sessionId  = data.session_id;
+        sessionId = data.session_id;
         updateSidebar({ session_id: sessionId, stage: 'greeting' });
       } catch (e) {
         showError('Could not reach the API server. Is it running?');
       }
     }
 
-    // ── WebSocket ──────────────────────────────────────────────────────────
     function connectWS() {
       if (ws) ws.close();
       ws = new WebSocket(`${WS_BASE}/ws/chat`);
@@ -749,7 +739,7 @@
       ws.onopen = () => {
         setStatus('online', 'Connected');
         document.getElementById('sendBtn').disabled = false;
-        document.getElementById('micBtn').disabled  = false;
+        document.getElementById('micBtn').disabled = false;
         document.getElementById('connBanner').classList.remove('visible');
         clearTimeout(reconnectTimer);
       };
@@ -757,21 +747,24 @@
       ws.onclose = () => {
         setStatus('', 'Disconnected');
         document.getElementById('sendBtn').disabled = true;
-        document.getElementById('micBtn').disabled  = true;
+        document.getElementById('micBtn').disabled = true;
         document.getElementById('connBanner').classList.add('visible');
         reconnectTimer = setTimeout(connectWS, 3000);
       };
 
       ws.onerror = () => setStatus('', 'Error');
 
-      ws.onmessage = (event) => handleFrame(JSON.parse(event.data));
+      ws.onmessage = (event) => {
+        const frame = JSON.parse(event.data);
+        handleFrame(frame);
+      };
     }
 
     function handleFrame(frame) {
       switch (frame.type) {
-        case 'token':           appendToken(frame.data);           break;
-        case 'done':            finishStreaming();                  break;
-        case 'state':           updateSidebar(frame.data);         break;
+        case 'token': appendToken(frame.data); break;
+        case 'done': finishStreaming(); break;
+        case 'state': updateSidebar(frame.data); break;
         case 'session_created':
           sessionId = frame.data;
           updateSidebar({ session_id: sessionId, stage: 'greeting' });
@@ -780,14 +773,12 @@
           finishStreaming();
           showError(frame.data);
           break;
-        // audio_chunk not used — speak buttons call /synth directly
       }
     }
 
-    // ── Sending ────────────────────────────────────────────────────────────
     function sendMessage() {
       const input = document.getElementById('messageInput');
-      const text  = input.value.trim();
+      const text = input.value.trim();
       if (!text || isStreaming || !ws || ws.readyState !== WebSocket.OPEN) return;
 
       hideWelcome();
@@ -795,7 +786,6 @@
       input.value = '';
       autoResize(input);
       beginStreaming();
-      // voice: false — speak buttons handle TTS on demand via /synth
       ws.send(JSON.stringify({ session_id: sessionId, message: text, voice: false }));
     }
 
@@ -805,15 +795,17 @@
     }
 
     function handleKey(e) {
-      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
     }
 
-    // ── Streaming ──────────────────────────────────────────────────────────
     function beginStreaming() {
       isStreaming = true;
       setStatus('typing', 'Ali is typing…');
       document.getElementById('sendBtn').disabled = true;
-      document.getElementById('micBtn').disabled  = true;
+      document.getElementById('micBtn').disabled = true;
 
       const row = document.createElement('div');
       row.className = 'message ali';
@@ -823,7 +815,7 @@
       avatar.textContent = '🏠';
 
       const wrapper = document.createElement('div');
-      const bubble  = document.createElement('div');
+      const bubble = document.createElement('div');
       bubble.className = 'bubble streaming';
 
       const meta = document.createElement('div');
@@ -836,7 +828,7 @@
       document.getElementById('messages').appendChild(row);
 
       currentBubble = bubble;
-      currentMeta   = meta;
+      currentMeta = meta;
       scrollBottom();
     }
 
@@ -850,39 +842,43 @@
       isStreaming = false;
       if (currentBubble) {
         currentBubble.classList.remove('streaming');
-
-        const bubble = currentBubble;  // capture for closure
+        
+        const bubble = currentBubble;
         if (currentMeta) {
           const timeSpan = document.createElement('span');
           timeSpan.textContent = formatTime();
-
+          
           const speakBtn = makeSpeakButton(() => bubble.textContent);
-
+          
           currentMeta.appendChild(timeSpan);
           currentMeta.appendChild(speakBtn);
         }
-
+        
         currentBubble = null;
-        currentMeta   = null;
+        currentMeta = null;
       }
       setStatus('online', 'Connected');
       document.getElementById('sendBtn').disabled = false;
-      document.getElementById('micBtn').disabled  = false;
+      document.getElementById('micBtn').disabled = false;
       scrollBottom();
     }
 
-    // ── Mic / ASR ──────────────────────────────────────────────────────────
     async function toggleRecording() {
       if (isStreaming) return;
 
-      if (isRecording) { mediaRecorder.stop(); return; }
+      if (isRecording) {
+        mediaRecorder.stop();
+        return;
+      }
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         audioChunks = [];
-        mediaRecorder = new MediaRecorder(stream, { mimeType: _bestMimeType() });
+        mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
 
-        mediaRecorder.ondataavailable = e => { if (e.data?.size > 0) audioChunks.push(e.data); };
+        mediaRecorder.ondataavailable = e => {
+          if (e.data?.size > 0) audioChunks.push(e.data);
+        };
 
         mediaRecorder.onstop = async () => {
           stream.getTracks().forEach(t => t.stop());
@@ -890,8 +886,8 @@
           setMicState('processing');
           document.getElementById('messageInput').placeholder = 'Transcribing…';
 
-          const mimeType = mediaRecorder.mimeType || 'audio/webm';
-          await transcribeBlob(new Blob(audioChunks, { type: mimeType }), mimeType);
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          await transcribeBlob(audioBlob);
 
           setMicState('idle');
           document.getElementById('messageInput').placeholder = 'Type or speak your message…';
@@ -909,16 +905,11 @@
       }
     }
 
-    function _bestMimeType() {
-      const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4'];
-      return candidates.find(t => MediaRecorder.isTypeSupported(t)) || '';
-    }
-
-    async function transcribeBlob(blob, mimeType) {
+    async function transcribeBlob(blob) {
       const formData = new FormData();
-      formData.append('audio', blob, 'recording' + _mimeToExt(mimeType));
+      formData.append('audio', blob, 'recording.webm');
       try {
-        const res  = await fetch(`${API_BASE}/transcribe`, { method: 'POST', body: formData });
+        const res = await fetch(`${API_BASE}/transcribe`, { method: 'POST', body: formData });
         const data = await res.json();
         if (data.text?.trim()) {
           const input = document.getElementById('messageInput');
@@ -932,26 +923,29 @@
       }
     }
 
-    function _mimeToExt(mime) {
-      if (mime.includes('ogg')) return '.ogg';
-      if (mime.includes('mp4')) return '.mp4';
-      return '.webm';
-    }
-
     function setMicState(state) {
       const btn = document.getElementById('micBtn');
       btn.classList.remove('recording', 'processing');
       switch (state) {
-        case 'recording':  btn.classList.add('recording');  btn.title = 'Click to stop';   btn.disabled = false; break;
-        case 'processing': btn.classList.add('processing'); btn.title = 'Transcribing…';   btn.disabled = true;  break;
-        default:           btn.title = 'Click to speak';   btn.disabled = isStreaming;
+        case 'recording':
+          btn.classList.add('recording');
+          btn.title = 'Click to stop';
+          btn.disabled = false;
+          break;
+        case 'processing':
+          btn.classList.add('processing');
+          btn.title = 'Transcribing…';
+          btn.disabled = true;
+          break;
+        default:
+          btn.title = 'Click to speak';
+          btn.disabled = isStreaming;
       }
     }
 
-    // ── UI helpers ─────────────────────────────────────────────────────────
     function appendMessage(role, text) {
       const isUser = role === 'user';
-      const row    = document.createElement('div');
+      const row = document.createElement('div');
       row.className = `message ${isUser ? 'user' : 'ali'}`;
 
       const avatar = document.createElement('div');
@@ -959,11 +953,11 @@
       avatar.textContent = isUser ? '👤' : '🏠';
 
       const wrapper = document.createElement('div');
-      const bubble  = document.createElement('div');
+      const bubble = document.createElement('div');
       bubble.className = 'bubble';
       bubble.textContent = text;
 
-      const meta     = document.createElement('div');
+      const meta = document.createElement('div');
       meta.className = 'message-meta';
 
       const timeSpan = document.createElement('span');
@@ -996,7 +990,8 @@
     }
 
     function hideWelcome() {
-      document.getElementById('welcome')?.remove();
+      const welcome = document.getElementById('welcome');
+      if (welcome) welcome.remove();
     }
 
     function updateSidebar(state) {
@@ -1006,12 +1001,13 @@
       document.getElementById('sideStage').innerHTML =
         `<span class="stage-badge stage-${stage}">${stage.replace('_', ' ')}</span>`;
       document.getElementById('sideCategory').textContent = state.selected_category || '—';
-      document.getElementById('sideSubtype').textContent  = state.selected_subtype  || '—';
-      document.getElementById('sidePrice').textContent    = state.selected_price    || '—';
+      document.getElementById('sideSubtype').textContent = state.selected_subtype || '—';
+      document.getElementById('sidePrice').textContent = state.selected_price || '—';
     }
 
     function setStatus(cls, text) {
-      document.getElementById('statusDot').className  = `status-dot ${cls}`;
+      const dot = document.getElementById('statusDot');
+      dot.className = `status-dot ${cls}`;
       document.getElementById('statusText').textContent = text;
     }
 
@@ -1031,7 +1027,14 @@
 
     async function newSession() {
       if (isStreaming) return;
-      if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+      if (currentSource) {
+        currentSource.stop();
+        currentSource = null;
+      }
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+      }
       activeSpeakBtn = null;
 
       document.getElementById('messages').innerHTML =
@@ -1047,7 +1050,7 @@
           </div>
         </div>`;
       currentBubble = null;
-      currentMeta   = null;
+      currentMeta = null;
       await createSession();
     }
 

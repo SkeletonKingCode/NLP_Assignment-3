@@ -199,7 +199,35 @@ async def synthesize_speech(req: SynthRequest):
 
     return Response(content=wav_bytes, media_type="audio/wav")
 
+# backend/api/main.py - Add streaming endpoint
 
+from fastapi.responses import StreamingResponse
+
+@app.get("/synth-stream")
+async def synthesize_speech_stream(text: str):
+    """Stream raw PCM audio directly."""
+    if not tts.is_available():
+        raise HTTPException(status_code=503, detail="TTS unavailable")
+    
+    async def audio_generator():
+        # Get raw PCM bytes
+        audio_bytes = await asyncio.get_event_loop().run_in_executor(
+            None, tts.synthesize_raw, text
+        )
+        # Stream in chunks
+        chunk_size = 4096
+        for i in range(0, len(audio_bytes), chunk_size):
+            yield audio_bytes[i:i + chunk_size]
+    
+    return StreamingResponse(
+        audio_generator(),
+        media_type="audio/L16",  # Raw PCM
+        headers={
+            "X-Sample-Rate": str(tts.get_audio_config()["sample_rate"]),
+            "X-Channels": str(tts.get_audio_config()["channels"])
+        }
+    )
+    
 # ---------------------------------------------------------------------------
 # Transcription endpoint  (POST /transcribe)
 # ---------------------------------------------------------------------------
